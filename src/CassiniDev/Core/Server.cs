@@ -573,8 +573,6 @@ namespace CassiniDev
 
                                         if (_Host == null)
                                         {
-                                            Console.WriteLine("NO HOST");
-
                                             conn.WriteErrorAndClose(500);
                                             return;
                                         }
@@ -762,9 +760,7 @@ namespace CassiniDev
 
             string physicalPath;
             string virtualPath = FindApplicationVirtualPath(path, out physicalPath);
-
-            Console.WriteLine("Virtual path {0} -> {1}", virtualPath, physicalPath);
-
+            
             if (!_appHostWatch.ContainsKey(virtualPath))
             {
                 lock (_lockObject)
@@ -987,8 +983,6 @@ namespace CassiniDev
         ///</summary>
         public void ShutDown()
         {
-            Console.WriteLine("SHUTDOWN");
-
             if (_shutdownInProgress)
             {
                 return;

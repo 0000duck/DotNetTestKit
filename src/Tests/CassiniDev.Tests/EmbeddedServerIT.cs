@@ -26,7 +26,7 @@ namespace CassiniDev.Tests
             try
             {
                 Assert.That(httpClient.Get("http://localhost:9901/Default.aspx"),
-                Is.StringContaining("Hello World"));
+                Is.StringContaining("Welcome to ASP.NET!"));
             }
             finally
             {
@@ -35,10 +35,10 @@ namespace CassiniDev.Tests
 
             try
             {
-                //httpClient.Get("http://localhost:9901/Default.aspx");
+                httpClient.Get("http://localhost:9901/Default.aspx");
 
                 Assert.Fail("Should not be success");
-            } catch (IOException e)
+            } catch (SimpleHttpClient.UnableToConnect e)
             {
             }
         }
@@ -48,9 +48,13 @@ namespace CassiniDev.Tests
     {
         private WebClient webClient = new WebClient();
 
+        public class UnableToConnect: Exception {
+            public UnableToConnect(string url) : base("Unable to connect to " + url) { }
+        }
+
         public string Get(string url)
         {
-            var request = WebRequest.Create("http://127.0.0.1:9901/Default.aspx");
+            var request = WebRequest.Create(url);
 
             try
             {
@@ -61,14 +65,21 @@ namespace CassiniDev.Tests
                     return new StreamReader(responseStream).ReadToEnd();
                 }
             } catch (WebException e) {
-                using (var responseStream = e.Response.GetResponseStream())
+                if (e.Response != null)
                 {
-                    var error = new StreamReader(responseStream).ReadToEnd();
+                    using (var responseStream = e.Response.GetResponseStream())
+                    {
+                        var error = new StreamReader(responseStream).ReadToEnd();
 
-                    Console.WriteLine(error);
+                        Console.WriteLine(error);
+                    }
+
+                    throw e;
                 }
-                
-                throw e;
+                else
+                {
+                    throw new UnableToConnect(url);
+                }                
             }
         }
     }

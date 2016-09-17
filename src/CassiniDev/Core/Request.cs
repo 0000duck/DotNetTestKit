@@ -435,12 +435,9 @@ namespace CassiniDev
         [AspNetHostingPermission(SecurityAction.Assert, Level = AspNetHostingPermissionLevel.Medium)]
         public void Process()
         {
-            Console.WriteLine("Process request");
-
             // read the request
             if (!TryParseRequest())
             {
-                Console.WriteLine("Failed to parse request");
                 return;
             }
 
@@ -451,13 +448,9 @@ namespace CassiniDev
             }
             if (!_host.RequireAuthentication || TryNtlmAuthenticate())
             {
-                Console.WriteLine("Is client script");
-
                 // special case for client script
                 if (_isClientScriptPath)
                 {
-                    Console.WriteLine("Client script");
-
                     _connection.WriteEntireResponseFromFile(
                         _host.PhysicalClientScriptPath + _path.Substring(_host.NormalizedClientScriptPath.Length), false);
                     return;
@@ -466,7 +459,6 @@ namespace CassiniDev
                 // deny access to code, bin, etc.
                 if (IsRequestForRestrictedDirectory())
                 {
-                    Console.WriteLine("Request for restricted");
                     _connection.WriteErrorAndClose(403);
                     return;
                 }
@@ -477,11 +469,7 @@ namespace CassiniDev
                     return;
                 }
 
-                Console.WriteLine("Prepare response");
-
                 PrepareResponse();
-
-                Console.WriteLine("Request to HttpRuntime");
 
                 // Hand the processing over to HttpRuntime
                 HttpRuntime.ProcessRequest(this);
