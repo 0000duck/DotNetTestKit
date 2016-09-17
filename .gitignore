@@ -1,0 +1,6 @@
+.svn
+bin
+obj
+.vs
+UpgradeLog*
+packages
