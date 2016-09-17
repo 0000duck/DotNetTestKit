@@ -148,7 +148,7 @@ namespace CassiniDev.Autodeploy
                     if (m_host == null)
                     {
                         var host = new Host();
-                        host.Configure(m_server, m_server.Port, m_virtualPath, m_setupInfo.ApplicationBase, m_server.RequireAuthentication, m_server.DisableDirectoryListing);
+                        //host.Configure(m_server, m_server.Port, m_virtualPath, m_setupInfo.ApplicationBase, m_server.RequireAuthentication, m_server.DisableDirectoryListing);
 
                         m_host = CreateWorkerAppDomainWithHost(host);
 
@@ -213,7 +213,7 @@ namespace CassiniDev.Autodeploy
             // FIXME: getting FileLoadException Could not load file or assembly 'WebDev.WebServer20, Version=4.0.1.6, Culture=neutral, PublicKeyToken=f7f6e0b4240c7c27' or one of its dependencies. Failed to grant permission to execute. (Exception from HRESULT: 0x80131418)
             // when running dnoa 3.4 samples - webdev is registering trust somewhere that we are not
             var remoteHost = (Host)m_applicationManager.CreateObject(host, host.GetType());
-            remoteHost.Configure(m_server, host.Port, host.VirtualPath, host.PhysicalPath, host.RequireAuthentication, host.DisableDirectoryListing);
+            //remoteHost.Configure(this, host.Port, host.VirtualPath, host.PhysicalPath, host.RequireAuthentication, host.DisableDirectoryListing);
             //remoteHost.StartAssemblyChangeMonitor();
 
             return remoteHost;

@@ -44,6 +44,7 @@ using Org.BouncyCastle.Math;
 using System.Security.Cryptography;
 using Org.BouncyCastle.Crypto.Parameters;
 using CassiniDev.Autodeploy;
+using CassiniDev.Core;
 //using Service;
 //using System.Data.Objects;
 
@@ -82,41 +83,6 @@ namespace CassiniDev
         private readonly string _virtualPath;
         private bool _disposed;
 
-        private Host _Host
-        {
-            get; set;
-            //get
-            //{
-            //    if (_hostWatch == null)
-            //    {
-            //        return null;
-            //    }
-
-            //    return _hostWatch.Host;
-            //}
-            //set
-            //{
-            //    if (value == null)
-            //    {
-            //        _hostWatch = null;
-            //        return;
-            //    }
-
-            //    if (_hostWatch == null)
-            //    {
-            //        _hostWatch = new HostWatch(this, value);
-            //    }
-
-            //    _hostWatch.Host = value;
-            //}
-        }
-
-        private Dictionary<string, HostWatch> _appHostWatch = new Dictionary<string, HostWatch>();
-
-#if NET40
-        private HostWatchManager m_projMonitor;
-#endif
-
         private IntPtr _processToken;
 
         private string _processUser;
@@ -127,6 +93,8 @@ namespace CassiniDev
 
         private Socket _socket;
 
+        private AppHosts _appHosts;
+
         //private Timer _timer;
 
         private string _appId;
@@ -136,24 +104,6 @@ namespace CassiniDev
         {
             get { return _appId; }
         }
-        ///<summary>
-        ///</summary>
-        public AppDomain HostAppDomain
-        {
-            get
-            {
-                if (_Host == null)
-                {
-                    GetHost();
-                }
-                if (_Host != null)
-                {
-                    return _Host.AppDomain;
-                }
-                return null;
-            }
-        }
-
 
         ///<summary>
         ///</summary>
@@ -461,7 +411,7 @@ namespace CassiniDev
         ///</summary>
         public void HostStopped()
         {
-            _Host = null;
+            _appHosts = null;
         }
 
         /// <summary>
@@ -514,16 +464,11 @@ namespace CassiniDev
         public void Start()
         {
             _socket = CreateSocketBindAndListen(AddressFamily.InterNetwork, _ipAddress, _port);
-            _Host = CreateHost(_physicalPath, _virtualPath);
+            _appHosts = new AppHosts(this);
 
-            _virtualPaths = new Dictionary<string, string>()
-            {
-                { _virtualPath, _physicalPath }
-            };
+            _appHosts.AddMapping(_virtualPath, _physicalPath);
             //_applicationPaths = _Host.GetApplicationVirtualPaths();
-
-            _Host = CreateWorkerAppDomainWithHost(_Host);
-
+            
             //start the timer
             //DecrementRequestCount();
 
@@ -571,14 +516,16 @@ namespace CassiniDev
 
                                         Console.WriteLine("REQUEST {0} {1}", method, url);
 
-                                        if (_Host == null)
+                                        var host = _appHosts.GetHost(url);
+
+                                        if (host == null)
                                         {
                                             conn.WriteErrorAndClose(500);
                                             return;
                                         }
 
                                         //IncrementRequestCount();
-                                        _Host.ProcessRequest(wrapper);
+                                        host.ProcessRequest(wrapper);
                                     }
                                 });
                         }
@@ -682,43 +629,6 @@ namespace CassiniDev
             return socket;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="virtualPath"></param>
-        /// <param name="physicalPath"></param>
-        /// <param name="hostType"></param>
-        /// <param name="port"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// This is Dmitry's hack to enable running outside of GAC.
-        /// There are some errors being thrown when running in proc
-        /// </remarks>
-        private Host CreateWorkerAppDomainWithHost(Host host)
-        {
-            // create BuildManagerHost in the worker app domain
-            //ApplicationManager appManager = ApplicationManager.GetApplicationManager();
-            Type buildManagerHostType = typeof(HttpRuntime).Assembly.GetType("System.Web.Compilation.BuildManagerHost");
-
-            IRegisteredObject buildManagerHost = ApplicationManager.CreateObject(host, buildManagerHostType);
-
-            // call BuildManagerHost.RegisterAssembly to make Host type loadable in the worker app domain
-            buildManagerHostType.InvokeMember("RegisterAssembly",
-                                              BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.NonPublic,
-                                              null,
-                                              buildManagerHost,
-                                              new object[] { host.GetType().Assembly.FullName, host.GetType().Assembly.Location });
-
-            // create Host in the worker app domain
-            // FIXME: getting FileLoadException Could not load file or assembly 'WebDev.WebServer20, Version=4.0.1.6, Culture=neutral, PublicKeyToken=f7f6e0b4240c7c27' or one of its dependencies. Failed to grant permission to execute. (Exception from HRESULT: 0x80131418)
-            // when running dnoa 3.4 samples - webdev is registering trust somewhere that we are not
-            var remoteHost = (Host)ApplicationManager.CreateObject(host, host.GetType());
-            remoteHost.Configure(this, host.Port, host.VirtualPath, host.PhysicalPath, host.RequireAuthentication, host.DisableDirectoryListing);
-            //remoteHost.StartAssemblyChangeMonitor();
-
-            return remoteHost;
-        }
-
         //private void DecrementRequestCount()
         //{
         //    lock (_lockObject)
@@ -736,126 +646,6 @@ namespace CassiniDev
         //        }
         //    }
         //}
-
-        private Host GetHost()
-        {
-            if (_shutdownInProgress)
-                return null;
-
-            //if (_Host == null)
-            //{
-            //    GetHost(_virtualPath);
-            //    _hostWatch = _appHostWatch[_virtualPath];
-            //}
-
-            return _Host;
-        }
-
-        private Host GetHost(string path)
-        {
-            if (_shutdownInProgress)
-                return null;
-
-            Host host = null;
-
-            string physicalPath;
-            string virtualPath = FindApplicationVirtualPath(path, out physicalPath);
-            
-            if (!_appHostWatch.ContainsKey(virtualPath))
-            {
-                lock (_lockObject)
-                {
-                    if (!_appHostWatch.ContainsKey(virtualPath))
-                    {
-                        host = CreateHost(physicalPath, virtualPath);
-
-                        _appHostWatch[virtualPath] = new HostWatch(this, host);
-
-#if NET40
-                        _appHostWatch[virtualPath].ProjectMonitor = m_projMonitor;
-                        _appHostWatch[virtualPath].Start();
-#endif
-                    }
-                }
-            }
-            else
-            {
-                host = _appHostWatch[virtualPath].Host;
-            }
-
-            return host;
-        }
-
-        private Host CreateHost(string physicalPath, string virtualPath)
-        {
-            Host host = new Host();
-            host.Configure(this, _port, virtualPath, physicalPath, _requireAuthentication, _disableDirectoryListing);
-
-            return host;
-        }
-
-        private string FindApplicationVirtualPath(string path, out string physicalPath)
-        {
-            if (path == _virtualPath || path == null)
-            {
-                physicalPath = _physicalPath;
-                return _virtualPath;
-            }
-
-            //var entities = new AppSettingsEntities();
-
-            if (_virtualPaths == null)
-            {
-                //var host = GetHost(_virtualPath);
-
-                //_virtualPaths = host.GetVirtualPaths();
-                //_applicationPaths = host.GetApplicationVirtualPaths();
-            }
-
-            /*using (var context = new AppSettingsEntities())
-            {
-                foreach (var app in from app in context.ApplicationSet
-                                    where app.PhysicalPath.ToLower() == path
-                                    select app)
-                {
-                    if (_virtualPaths.ContainsKey(app.VirtualPath))
-                    {
-                        continue;
-                    }
-
-                    _virtualPaths.Add(app.VirtualPath, app.PhysicalPath);
-                    _applicationPaths.Add(app.VirtualPath);
-                }
-            }*/
-
-            if (_applicationPaths == null)
-            {
-                physicalPath = _physicalPath;
-                return _virtualPath;
-            }
-
-            string bestMatch = null;
-            //string bestMatchPhysicalPath = null;
-
-            foreach (var appPath in _applicationPaths)
-            {
-                if (path.StartsWith(appPath, true, CultureInfo.InvariantCulture) &&
-                    (bestMatch == null || appPath.Length > bestMatch.Length))
-                {
-                    bestMatch = appPath;
-                }
-            }
-
-            if (bestMatch == null)
-            {
-                physicalPath = _physicalPath;
-                return _virtualPath;
-            }
-
-            physicalPath = MapPath(bestMatch);
-
-            return bestMatch;
-        }
 
         public string MapPath(string virtualPath)
         {
@@ -893,13 +683,7 @@ namespace CassiniDev
 
             return null;
         }
-
-        private string FindApplicationVirtualPath(string path)
-        {
-            string physicalPath;
-            return FindApplicationVirtualPath(path, out physicalPath);
-        }
-
+        
         //private void IncrementRequestCount()
         //{
 
@@ -1010,17 +794,9 @@ namespace CassiniDev
 
             try
             {
-                if (_Host != null)
+                if (_appHosts != null)
                 {
-                    _Host.Shutdown();
-                }
-
-                // the host is going to raise an event that this class uses to null the field.
-                // just wait until the field is nulled and continue.
-
-                while (_Host != null)
-                {
-                    new AutoResetEvent(false).WaitOne(100);
+                    _appHosts.Shutdown();
                 }
             }
             // ReSharper disable EmptyGeneralCatchClause

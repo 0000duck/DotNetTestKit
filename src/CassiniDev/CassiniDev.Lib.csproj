@@ -118,6 +118,7 @@
     <Compile Include="Configuration\PluginElement.cs" />
     <Compile Include="Configuration\PluginElementCollection.cs" />
     <Compile Include="ContentLocator.cs" />
+    <Compile Include="Core\AppHosts.cs" />
     <Compile Include="Core\ConfigMapPath.cs" />
     <Compile Include="Core\ConfigMapPathFactory.cs" />
     <Compile Include="Core\Connection.cs" />

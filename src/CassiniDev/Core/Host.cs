@@ -27,7 +27,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Linq;
-using System.Web.Compilation;
 
 #endregion
 
@@ -65,7 +64,7 @@ namespace CassiniDev
 
         private bool _requireAuthentication;
 
-        private Server _server;
+        private AppHosts _appHosts;
 
         private string _virtualPath;
 
@@ -130,9 +129,9 @@ namespace CassiniDev
         {
             // Unhook the Host so Server will process the requests in the new appdomain.
 
-            if (_server != null)
+            if (_appHosts != null)
             {
-                _server.HostStopped();
+                _appHosts.HostStopped();
             }
 
             // Make sure all the pending calls complete before this Object is unregistered.
@@ -147,21 +146,21 @@ namespace CassiniDev
 
         #endregion
 
-        public void Configure(Server server, int port, string virtualPath, string physicalPath,
+        public void Configure(AppHosts appHosts, int port, string virtualPath, string physicalPath,
                               bool requireAuthentication)
         {
-            Configure(server, port, virtualPath, physicalPath, requireAuthentication, false);
+            Configure(appHosts, port, virtualPath, physicalPath, requireAuthentication, false);
         }
 
-        public void Configure(Server server, int port, string virtualPath, string physicalPath)
+        public void Configure(AppHosts appHosts, int port, string virtualPath, string physicalPath)
         {
-            Configure(server, port, virtualPath, physicalPath, false, false);
+            Configure(appHosts, port, virtualPath, physicalPath, false, false);
         }
 
-        public void Configure(Server server, int port, string virtualPath, string physicalPath,
+        public void Configure(AppHosts appHosts, int port, string virtualPath, string physicalPath,
                               bool requireAuthentication, bool disableDirectoryListing)
         {
-            _server = server;
+            _appHosts = appHosts;
 
             _port = port;
             _installPath = null;
@@ -186,7 +185,7 @@ namespace CassiniDev
 
         public SecurityIdentifier GetProcessSid()
         {
-            using (WindowsIdentity identity = new WindowsIdentity(_server.GetProcessToken()))
+            using (WindowsIdentity identity = new WindowsIdentity(_appHosts.GetProcessToken()))
             {
                 return identity.User;
             }
@@ -195,12 +194,12 @@ namespace CassiniDev
         public IntPtr GetProcessToken()
         {
             new SecurityPermission(PermissionState.Unrestricted).Assert();
-            return _server.GetProcessToken();
+            return _appHosts.GetProcessToken();
         }
 
         public string GetProcessUser()
         {
-            return _server.GetProcessUser();
+            return _appHosts.GetProcessUser();
         }
 
         public override object InitializeLifetimeService()
@@ -271,7 +270,7 @@ namespace CassiniDev
 
             try
             {
-                new Request(_server, this, conn).Process();
+                new Request(_appHosts.Server, this, conn).Process();
             }
             finally
             {
@@ -323,7 +322,7 @@ namespace CassiniDev
             //ConstructorInfo ctor = type.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)[0];
             //return (IConfigMapPathFactory)Activator.CreateInstance(type, true); //ctor.Invoke(null, new object[] { GetVirtualPath(), GetPhysicalPath() });
 
-            return new ConfigMapPathFactory(_server);
+            return new ConfigMapPathFactory(_appHosts);
         }
 
         public IntPtr GetConfigToken()

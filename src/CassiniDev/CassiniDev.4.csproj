@@ -159,6 +159,7 @@
     <Compile Include="Configuration\CassiniDevProfileElementCollection.cs" />
     <Compile Include="Configuration\PluginElement.cs" />
     <Compile Include="Configuration\PluginElementCollection.cs" />
+    <Compile Include="Core\AppHosts.cs" />
     <Compile Include="Core\Connection.cs" />
     <Compile Include="Core\ConfigMapPath.cs" />
     <Compile Include="Core\ConfigMapPathFactory.cs" />
