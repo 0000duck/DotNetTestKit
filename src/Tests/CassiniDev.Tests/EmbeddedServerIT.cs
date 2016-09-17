@@ -15,12 +15,13 @@ namespace CassiniDev.Tests
     public class EmbeddedServerIT
     {
         SimpleHttpClient httpClient = new SimpleHttpClient();
+        SolutionFiles solutionFiles = SolutionFiles.FromPathFile("solution-dir.txt");
 
         [Test]
         public void StartAndStop()
         {
             var server = EmbeddedServer.NewServer(9901)
-                .WithVirtualDirectory("/", "C:\\Code\\CassiniDevMultiApp\\CassiniDev\\src\\Tests\\CassiniDev4.Tests.Web")
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\CassiniDev4.Tests.Web"))
                 .Start();
 
             try
@@ -81,6 +82,26 @@ namespace CassiniDev.Tests
                     throw new UnableToConnect(url);
                 }                
             }
+        }
+    }
+
+    class SolutionFiles
+    {
+        private readonly string solutionDir;
+
+        public SolutionFiles(string solutionDir)
+        {
+            this.solutionDir = solutionDir;
+        }
+
+        public static SolutionFiles FromPathFile(string filepath)
+        {
+            return new SolutionFiles(File.ReadAllText(filepath).Trim());
+        }
+
+        internal string ResolvePath(string relativePath)
+        {
+            return Path.Combine(solutionDir, relativePath);
         }
     }
 }
