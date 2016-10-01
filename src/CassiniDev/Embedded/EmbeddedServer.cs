@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CassiniDev.Embedded
 {
@@ -12,7 +11,8 @@ namespace CassiniDev.Embedded
         public class Builder
         {
             private int port;
-            private Dictionary<string, String> virtualDirectories = new Dictionary<string, string>();
+            private List<DirectoryMapping> virtualDirectories = new List<DirectoryMapping>();
+            private TextWriter outputWriter;
 
             protected internal Builder(int port)
             {
@@ -21,23 +21,45 @@ namespace CassiniDev.Embedded
 
             public Builder WithVirtualDirectory(string virtualPath, string directoryPath)
             {
-                virtualDirectories.Add(virtualPath, directoryPath);
+                virtualDirectories.Add(new DirectoryMapping(virtualPath, directoryPath));
+
+                return this;
+            }
+
+            public Builder WithOutputCollectionTo(TextWriter output)
+            {
+                outputWriter = output;
 
                 return this;
             }
 
             public Server Start()
             {
-                var dirPath = Path.GetFullPath(virtualDirectories.First().Value);
+                var mainAppVirtualPath = virtualDirectories.First().VirtualPath;
+                var mainAppPhysicalPath = virtualDirectories.First().PhysicalPath;
+
+                var dirPath = Path.GetFullPath(mainAppPhysicalPath);
 
                 if (!Directory.Exists(dirPath))
                 {
                     throw new DirectoryNotFoundException(dirPath);
                 }
                 
-                var server = new Server(port, virtualDirectories.First().Key, virtualDirectories.First().Value);
+                var server = new Server(port, mainAppVirtualPath, mainAppPhysicalPath);
+
+                virtualDirectories.Skip(1).ToList().ForEach(additionalMapping =>
+                {
+                    server.RegisterAdditionalMapping(additionalMapping.VirtualPath, additionalMapping.PhysicalPath);
+                });
+
+                server.OutputWriter = outputWriter;
 
                 server.Start();
+
+                AppDomain.CurrentDomain.DomainUnload += (e, a) =>
+                {
+                    server.Dispose();
+                };
 
                 return server;
             }
@@ -47,5 +69,17 @@ namespace CassiniDev.Embedded
         {
             return new Builder(port);
         }
+    }
+
+    class DirectoryMapping
+    {
+        public DirectoryMapping(string virtualPath, string physicalPath)
+        {
+            this.VirtualPath = virtualPath;
+            this.PhysicalPath = physicalPath;
+        }
+
+        public string PhysicalPath { get; private set; }
+        public string VirtualPath { get; private set; }
     }
 }

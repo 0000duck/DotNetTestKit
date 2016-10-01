@@ -20,18 +20,12 @@ namespace CassiniDev.Tests
         [Test]
         public void StartAndStop()
         {
-            var server = EmbeddedServer.NewServer(9901)
+            using (var server = EmbeddedServer.NewServer(9901)
                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\CassiniDev4.Tests.Web"))
-                .Start();
-
-            try
+                .Start())
             {
                 Assert.That(httpClient.Get("http://localhost:9901/Default.aspx"),
                 Is.StringContaining("Welcome to ASP.NET!"));
-            }
-            finally
-            {
-                server.ShutDown();
             }
 
             try
@@ -42,6 +36,49 @@ namespace CassiniDev.Tests
             } catch (SimpleHttpClient.UnableToConnect e)
             {
             }
+        }
+
+
+        [Test]
+        public void LoadMultipleApps()
+        {
+            var server = EmbeddedServer.NewServer(9902)
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
+                .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\SubRootApp"))
+                .Start();
+
+            Assert.That(httpClient.Get("http://localhost:9902/Default.aspx"),
+                Is.StringContaining("Hello, I'm RootApp"));
+
+            Assert.That(httpClient.Get("http://localhost:9902/Sub/Default.aspx"),
+                Is.StringContaining("Hello, I'm an appConfig value from RootApp"));
+        }
+
+        [Test]
+        public void LoadRootAppAtPath()
+        {
+            var server = EmbeddedServer.NewServer(9903)
+                .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
+                .Start();
+
+            Assert.That(httpClient.Get("http://localhost:9903/Sub/Default.aspx"),
+                Is.StringContaining("Hello, I'm RootApp"));
+        }
+
+        [Test]
+        public void CollectConsoleOutputFromTheApp()
+        {
+            var output = new StringWriter();
+
+            var server = EmbeddedServer.NewServer(9904)
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\OutputtingApp"))
+                .WithOutputCollectionTo(output)
+                .Start();
+
+            Assert.That(httpClient.Get("http://localhost:9904/Default.aspx"),
+                Is.StringContaining("Hello, I'm OutputtingApp"));
+
+            Assert.That(output.ToString().Trim(), Is.EqualTo("Hello!"));
         }
     }
 

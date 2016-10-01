@@ -118,6 +118,11 @@ namespace CassiniDev
             get { return _requireAuthentication; }
         }
 
+        public void SetConsoleOut(TextWriter writer)
+        {
+            Console.SetOut(writer);
+        }
+
         public string VirtualPath
         {
             get { return _virtualPath; }
@@ -131,7 +136,7 @@ namespace CassiniDev
 
             if (_appHosts != null)
             {
-                _appHosts.HostStopped();
+                _appHosts.HostStopped(_virtualPath);
             }
 
             // Make sure all the pending calls complete before this Object is unregistered.

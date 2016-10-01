@@ -19,11 +19,11 @@ namespace CassiniDev
     /// </summary>
     public class ConfigMapPathFactory : MarshalByRefObject, IConfigMapPathFactory
     {
-        private Server m_server;
+        private AppHosts _appHosts;
 
-        public ConfigMapPathFactory(Server server)
+        public ConfigMapPathFactory(AppHosts appHosts)
         {
-            m_server = server;
+            _appHosts = appHosts;
         }
 
         #region IConfigMapPathFactory Members
@@ -69,7 +69,7 @@ namespace CassiniDev
                     target = target.TrimEnd('/');
                 }
 
-                var targetPhysicalPath = m_server.MapPath(target);
+                var targetPhysicalPath = _appHosts.MapPath(target);
 
                 if (targetPhysicalPath != null)
                 {

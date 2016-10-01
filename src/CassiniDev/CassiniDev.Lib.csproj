@@ -129,6 +129,7 @@
     <Compile Include="Core\Request.cs" />
     <Compile Include="Core\RequestEventArgs.cs" />
     <Compile Include="Core\Server.cs" />
+    <Compile Include="Embedded\EmbeddedServer.cs" />
     <Compile Include="IContentLocator.cs" />
     <Compile Include="LocalContentLocator.cs" />
     <Compile Include="Logging\LogInfo.cs" />

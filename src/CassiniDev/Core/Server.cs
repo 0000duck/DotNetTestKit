@@ -44,7 +44,6 @@ using Org.BouncyCastle.Math;
 using System.Security.Cryptography;
 using Org.BouncyCastle.Crypto.Parameters;
 using CassiniDev.Autodeploy;
-using CassiniDev.Core;
 //using Service;
 //using System.Data.Objects;
 
@@ -65,7 +64,6 @@ namespace CassiniDev
         public List<string> Plugins = new List<string>();
         ///<summary>
         ///</summary>
-        public readonly ApplicationManager ApplicationManager;
 
         private readonly bool _disableDirectoryListing;
 
@@ -230,11 +228,11 @@ namespace CassiniDev
                                 : _physicalPath + "\\";
             ProcessConfiguration();
 
-            ApplicationManager = ApplicationManager.GetApplicationManager();
-
             string uniqueAppString = string.Concat(virtualPath, physicalPath, ":", _port.ToString()).ToLowerInvariant();
             _appId = (uniqueAppString.GetHashCode()).ToString("x", CultureInfo.InvariantCulture);
             ObtainProcessToken();
+
+            _appHosts = new AppHosts(this, _virtualPath, _physicalPath);
 
 #if NET40
             //m_projMonitor = new HostWatchManager();
@@ -365,6 +363,17 @@ namespace CassiniDev
             get { return _virtualPath; }
         }
 
+        public TextWriter OutputWriter {
+            get
+            {
+                return _appHosts.OutputWriter;
+            }
+            internal set
+            {
+                _appHosts.OutputWriter = value;
+            }
+        }
+
         #region IDisposable Members
 
         /// <summary>
@@ -464,9 +473,7 @@ namespace CassiniDev
         public void Start()
         {
             _socket = CreateSocketBindAndListen(AddressFamily.InterNetwork, _ipAddress, _port);
-            _appHosts = new AppHosts(this);
-
-            _appHosts.AddMapping(_virtualPath, _physicalPath);
+            
             //_applicationPaths = _Host.GetApplicationVirtualPaths();
             
             //start the timer
@@ -517,6 +524,8 @@ namespace CassiniDev
                                         Console.WriteLine("REQUEST {0} {1}", method, url);
 
                                         var host = _appHosts.GetHost(url);
+
+                                        Console.WriteLine("Host retrieved for {0}", host.VirtualPath);
 
                                         if (host == null)
                                         {
@@ -646,43 +655,6 @@ namespace CassiniDev
         //        }
         //    }
         //}
-
-        public string MapPath(string virtualPath)
-        {
-            string bestMatch = null;
-            string bestMatchPhysicalPath = null;
-
-            if (virtualPath.StartsWith(_virtualPath, true, CultureInfo.InvariantCulture))
-            {
-                bestMatch = _virtualPath;
-                bestMatchPhysicalPath = _physicalPath;
-            }
-
-            foreach (var pathPair in _virtualPaths)
-            {
-                var vPath = pathPair.Key;
-                var physicalPath = pathPair.Value;
-
-                if (virtualPath.StartsWith(vPath, true, CultureInfo.InvariantCulture) &&
-                    (bestMatch == null || vPath.Length > bestMatch.Length))
-                {
-                    bestMatch = vPath;
-                    bestMatchPhysicalPath = physicalPath;
-                }
-            }
-
-            if (bestMatch != null)
-            {
-                var sep = Path.DirectorySeparatorChar.ToString();
-                var newPath = virtualPath.Substring(bestMatch.Length).Replace("/", sep);
-                newPath = newPath.TrimStart(Path.DirectorySeparatorChar);
-                newPath = Path.Combine(bestMatchPhysicalPath, newPath);
-
-                return newPath;
-            }
-
-            return null;
-        }
         
         //private void IncrementRequestCount()
         //{
@@ -767,6 +739,8 @@ namespace CassiniDev
         ///</summary>
         public void ShutDown()
         {
+            Console.WriteLine("Server shutdown");
+
             if (_shutdownInProgress)
             {
                 return;
@@ -806,6 +780,11 @@ namespace CassiniDev
                 // TODO: what am i afraid of here?
             }
 
+        }
+
+        internal void RegisterAdditionalMapping(string virtualDirectory, string physicalDirectory)
+        {
+            _appHosts.AddMapping(virtualDirectory, physicalDirectory);
         }
 
         //private void TimeOut(object ignored)
