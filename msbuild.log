@@ -1,4 +1,4 @@
-Build started 2016-09-16 18:39:59.
+Build started 2016-10-02 15:22:46.
 Project "C:\Code\CassiniDevMultiApp\CassiniDev\src\build.xml" on node 1 (default targets).
 Building with tools version "4.0".
 C:\Code\CassiniDevMultiApp\CassiniDev\src\build.xml(12,3): error MSB4019: The imported project "C:\Program Files (x86)\MSBuild\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" was not found. Confirm that the path in the <Import> declaration is correct, and that the file exists on disk.
@@ -13,4 +13,4 @@ Build FAILED.
     0 Warning(s)
     1 Error(s)
 
-Time Elapsed 00:00:00.78
+Time Elapsed 00:00:00.80

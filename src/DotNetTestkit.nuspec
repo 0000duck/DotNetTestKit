@@ -7,6 +7,7 @@
     <projectUrl>https://github.com/uppin/DotNetTestKit/</projectUrl>
     <dependencies>
       <dependency id="Common.Logging" />
+      <dependency id="BouncyCastle.Crypto" />
     </dependencies>
     <id>DotNetTestkit</id>
     <title>DotNetTestkit</title>
@@ -25,20 +26,10 @@
     </frameworkAssemblies>
   </metadata>
   <files>
+    <file src="EmbeddedServer\bin\Release\CassiniDev4-lib.dll" target="lib\net40" />
+    <file src="EmbeddedServer\bin\Release\CassiniDev4-lib.pdb" target="lib\net40" />
 
-    <file src="..\dist\lib\CassiniDev\bin\**\CassiniDev-lib.dll" target="lib\net35" />
-    <file src="..\dist\lib\CassiniDev\bin\**\CassiniDev-lib.pdb" target="lib\net35" />
-    <file src="..\dist\lib\CassiniDev\bin\**\CassiniDev-lib.xml" target="lib\net35" />
-
-    <file src="..\dist\lib\CassiniDev\bin\**\CassiniDev4-lib.dll" target="lib\net40" />
-    <file src="..\dist\lib\CassiniDev\bin\**\CassiniDev4-lib.pdb" target="lib\net40" />
-    <file src="..\dist\lib\CassiniDev\bin\**\CassiniDev4-lib.xml" target="lib\net40" />
-
-    <file src="..\dist\lib\CassiniDev\bin\**\EmbeddedServer.dll" target="lib\net40" />
-    <file src="..\dist\lib\CassiniDev\bin\**\EmbeddedServer.pdb" target="lib\net40" />
-    <file src="..\dist\lib\CassiniDev\bin\**\EmbeddedServer.xml" target="lib\net40" />
-    
-
-    <file src="lib\src\**\*.cs" target="src" />
+    <file src="EmbeddedServer\bin\Release\DotNetTestKit.EmbeddedServer.dll" target="lib\net40" />
+    <file src="EmbeddedServer\bin\Release\DotNetTestKit.EmbeddedServer.pdb" target="lib\net40" />
   </files>
 </package>
