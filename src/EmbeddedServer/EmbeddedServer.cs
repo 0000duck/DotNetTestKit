@@ -1,13 +1,21 @@
-﻿using System;
+﻿using CassiniDev;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace CassiniDev.Embedded
+namespace DotNetTestkit
 {
-    public static class EmbeddedServer
+    public class EmbeddedServer: IDisposable
     {
+        private Server server;
+
+        private EmbeddedServer(Server server)
+        {
+            this.server = server;
+        }
+
         public class Builder
         {
             private int port;
@@ -33,7 +41,7 @@ namespace CassiniDev.Embedded
                 return this;
             }
 
-            public Server Start()
+            public EmbeddedServer Start()
             {
                 var mainAppVirtualPath = virtualDirectories.First().VirtualPath;
                 var mainAppPhysicalPath = virtualDirectories.First().PhysicalPath;
@@ -61,13 +69,18 @@ namespace CassiniDev.Embedded
                     server.Dispose();
                 };
 
-                return server;
+                return new EmbeddedServer(server);
             }
         }
 
         public static Builder NewServer(int port)
         {
             return new Builder(port);
+        }
+
+        public void Dispose()
+        {
+            server.Dispose();
         }
     }
 

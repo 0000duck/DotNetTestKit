@@ -1,22 +1,20 @@
 ﻿<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
-    <version>5.0.0-bleeding-0</version>
-    <authors>Sky Sanders</authors>
-    <owners>Sky Sanders</owners>
-    <licenseUrl>http://cassinidev.codeplex.com/license</licenseUrl>
-    <projectUrl>http://cassinidev.codeplex.com/</projectUrl>
-    <iconUrl>http://download.codeplex.com/Download?ProjectName=cassinidev&amp;DownloadId=123365&amp;Build=18101</iconUrl>
+    <version>0.1.0</version>
+    <authors>Mantas Indrašius</authors>
+    <owners>Mantas Indrašius</owners>
+    <projectUrl>https://github.com/uppin/DotNetTestKit/</projectUrl>
     <dependencies>
       <dependency id="Common.Logging" />
     </dependencies>
-    <id>CassiniDev</id>
-    <title>CassiniDev</title>
+    <id>DotNetTestkit</id>
+    <title>DotNetTestkit</title>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
 
-    <tags>CassiniDev CassiniDev WebServer</tags>
-    <description>Self-contained hostable ASP.NET web server providing an open platform for developing a robust ASP.Net web server implementation that addresses many of the limitations and difficulties encountered when using Cassini and/or VS Development Server.</description>
-    <summary>Self-contained hostable ASP.NET web server well suited for self hosting, testing and continuous integration environments</summary>
+    <tags>CassiniDev DotNetTestKit</tags>
+    <description>Embedded Development Server capable of hosting multiple applications at a time</description>
+    <summary>Embedded Development Server capable of hosting multiple applications at a time</summary>
     <language>en-US</language>
 
     <frameworkAssemblies>
@@ -35,6 +33,10 @@
     <file src="..\dist\lib\CassiniDev\bin\**\CassiniDev4-lib.dll" target="lib\net40" />
     <file src="..\dist\lib\CassiniDev\bin\**\CassiniDev4-lib.pdb" target="lib\net40" />
     <file src="..\dist\lib\CassiniDev\bin\**\CassiniDev4-lib.xml" target="lib\net40" />
+
+    <file src="..\dist\lib\CassiniDev\bin\**\EmbeddedServer.dll" target="lib\net40" />
+    <file src="..\dist\lib\CassiniDev\bin\**\EmbeddedServer.pdb" target="lib\net40" />
+    <file src="..\dist\lib\CassiniDev\bin\**\EmbeddedServer.xml" target="lib\net40" />
     
 
     <file src="lib\src\**\*.cs" target="src" />

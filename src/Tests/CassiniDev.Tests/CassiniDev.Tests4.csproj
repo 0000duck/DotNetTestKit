@@ -140,6 +140,10 @@
       <Project>{070AE36D-4CE1-4708-BD0F-2896A6F117FC}</Project>
       <Name>CassiniDev.Lib4</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\EmbeddedServer\EmbeddedServer.csproj">
+      <Project>{187b166b-ef4f-4d34-beb9-c6a4ed71479e}</Project>
+      <Name>EmbeddedServer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CassiniDev4.Tests.Web\CassiniDev4.Tests.Web.csproj">
       <Project>{D4BEEAC1-493C-4B21-ADDB-0B29CDBD8266}</Project>
       <Name>CassiniDev4.Tests.Web</Name>

@@ -1,13 +1,8 @@
-﻿using CassiniDev.Embedded;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net.Http;
 using System.Net;
 using System.IO;
-using System.Threading;
+using DotNetTestkit;
 
 namespace CassiniDev.Tests
 {

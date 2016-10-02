@@ -368,7 +368,7 @@ namespace CassiniDev
             {
                 return _appHosts.OutputWriter;
             }
-            internal set
+            set
             {
                 _appHosts.OutputWriter = value;
             }
@@ -782,7 +782,7 @@ namespace CassiniDev
 
         }
 
-        internal void RegisterAdditionalMapping(string virtualDirectory, string physicalDirectory)
+        public void RegisterAdditionalMapping(string virtualDirectory, string physicalDirectory)
         {
             _appHosts.AddMapping(virtualDirectory, physicalDirectory);
         }
