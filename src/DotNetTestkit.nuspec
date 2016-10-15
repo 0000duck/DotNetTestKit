@@ -28,8 +28,11 @@
   <files>
     <file src="EmbeddedServer\bin\Release\CassiniDev-lib.dll" target="lib\net40" />
     <file src="EmbeddedServer\bin\Release\CassiniDev-lib.pdb" target="lib\net40" />
-
     <file src="EmbeddedServer\bin\Release\DotNetTestKit.EmbeddedServer.dll" target="lib\net40" />
     <file src="EmbeddedServer\bin\Release\DotNetTestKit.EmbeddedServer.pdb" target="lib\net40" />
+    <file src="EmbeddedServer.Runner\bin\Release\DotNetTestKit.EmbeddedServer.Runner.exe" target="lib\net40" />
+    <file src="EmbeddedServer.Runner\bin\Release\DotNetTestKit.EmbeddedServer.Runner.pdb" target="lib\net40" />
+    <file src="EnvironmentLifecycle\bin\Release\DotNetTestKit.EnvironmentLifecycle.pdb" target="lib\net40" />
+	<file src="EnvironmentLifecycle\bin\Release\DotNetTestKit.EnvironmentLifecycle.dll" target="lib\net40" />
   </files>
 </package>
