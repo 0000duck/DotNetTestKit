@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -71,7 +73,7 @@ namespace DotNetTestkit.EnvironmentLifecycle
                 {
                     lock (environmentStartTasks)
                     {
-                        environmentStarting = Task.Run(() =>
+                        environmentStarting = new Task<EnvironmentStartResult>(() =>
                         {
                             try
                             {
@@ -85,6 +87,8 @@ namespace DotNetTestkit.EnvironmentLifecycle
                                 return EnvironmentStartResult.Failed;
                             }
                         });
+
+                        environmentStarting.Start();
 
                         environmentStartTasks.Add(environment.GetType(), environmentStarting);
                     }
@@ -108,6 +112,66 @@ namespace DotNetTestkit.EnvironmentLifecycle
                     Console.WriteLine(ex.ToString());
                 }
             }
+        }
+    }
+
+    public class EnvironmentStarter: MarshalByRefObject
+    {
+        public IEnvironmentLifecycle ForType(string typeName)
+        {
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                Console.WriteLine(assembly.FullName);
+
+                var type = assembly.GetType(typeName);
+
+                if (type != null)
+                {
+                    return new RemoteEnvironmentLifecycle(Environments.ForType(type));
+                }
+            }
+
+            return null;
+        }
+
+        public void Setup(string pathToAssembly, TextWriter output, TextWriter error)
+        {
+            Console.SetOut(output);
+            Console.SetError(error);
+
+            var assemblyName = Path.GetFileNameWithoutExtension(pathToAssembly);
+
+            Assembly.Load(assemblyName);
+        }
+
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
+    }
+
+    public class RemoteEnvironmentLifecycle : MarshalByRefObject, IEnvironmentLifecycle
+    {
+        private readonly IEnvironmentLifecycle environment;
+
+        public RemoteEnvironmentLifecycle(IEnvironmentLifecycle environment)
+        {
+            this.environment = environment;
+        }
+
+        public void Reload()
+        {
+            environment.Reload();
+        }
+
+        public void Start()
+        {
+            environment.Start();
+        }
+
+        public void Stop()
+        {
+            environment.Stop();
         }
     }
 
