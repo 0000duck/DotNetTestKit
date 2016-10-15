@@ -5,20 +5,29 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace CassiniDev.Tests
 {
     [TestFixture]
     public class EnvironmentLifecycleIT
     {
+        private StringWriter error;
+        private StringWriter output;
+
         SolutionFiles solutionFiles = SolutionFiles.FromPathFile("solution-dir.txt");
+        SimpleHttpClient client = new SimpleHttpClient();
+
+        [SetUp]
+        public void SetUp()
+        {
+            output = new StringWriter();
+            error = new StringWriter();
+        }
 
         [Test]
-        public void StartTheEnvironment()
+        public void StartSimpleEnvironment()
         {
-            var output = new StringWriter();
-            var error = new StringWriter();
-
             ServerRunner.RunWith(
                 EnvironmentOptionsTo(
                     dllPath: "Tests\\ExampleApps\\SetUpEnvironmentApp\\bin\\SetUpEnvironmentApp.dll",
@@ -27,6 +36,17 @@ namespace CassiniDev.Tests
                 error: error);
 
             Assert.That(output.ToString(), Does.Contain("Started"));
+        }
+
+        [Test]
+        public void StartServerEnvironment()
+        {
+            ServerRunner.RunWith(
+                EnvironmentOptionsTo(
+                    dllPath: "Tests\\ExampleApps\\SetUpEnvironmentApp\\bin\\SetUpEnvironmentApp.dll",
+                    typeName: "SetUpEnvironmentApp.ServerEnvironment"));
+            
+            Assert.That(client.Get("http://localhost:9901/"), Is.Not.Empty);
         }
 
         private ProgramOptions EnvironmentOptionsTo(string dllPath, string typeName)

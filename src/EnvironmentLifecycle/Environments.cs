@@ -117,31 +117,36 @@ namespace DotNetTestkit.EnvironmentLifecycle
 
     public class EnvironmentStarter: MarshalByRefObject
     {
-        public IEnvironmentLifecycle ForType(string typeName)
+        public IEnvironmentLifecycle ForType(AssemblyName assemblyName, string typeName)
         {
+            Console.WriteLine("For Type {0}", typeName);
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 Console.WriteLine(assembly.FullName);
 
-                var type = assembly.GetType(typeName);
-
-                if (type != null)
+                if (assembly.GetName().FullName.Equals(assemblyName.FullName))
                 {
-                    return new RemoteEnvironmentLifecycle(Environments.ForType(type));
+                    var type = assembly.GetType(typeName);
+
+                    if (type != null)
+                    {
+                        return new RemoteEnvironmentLifecycle(Environments.ForType(type));
+                    }
                 }
             }
 
             return null;
         }
 
-        public void Setup(string pathToAssembly, TextWriter output, TextWriter error)
+        public AssemblyName Setup(string pathToAssembly, TextWriter output, TextWriter error)
         {
             Console.SetOut(output);
             Console.SetError(error);
 
             var assemblyName = Path.GetFileNameWithoutExtension(pathToAssembly);
 
-            Assembly.Load(assemblyName);
+            return Assembly.Load(assemblyName).GetName();
         }
 
         public override object InitializeLifetimeService()

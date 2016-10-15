@@ -20,7 +20,7 @@ namespace CassiniDev.Tests
                 .Start())
             {
                 Assert.That(httpClient.Get("http://localhost:9901/Default.aspx"),
-                Is.StringContaining("Welcome to ASP.NET!"));
+                Does.Contain("Welcome to ASP.NET!"));
             }
 
             try
@@ -43,10 +43,10 @@ namespace CassiniDev.Tests
                 .Start();
 
             Assert.That(httpClient.Get("http://localhost:9902/Default.aspx"),
-                Is.StringContaining("Hello, I'm RootApp"));
+                Does.Contain("Hello, I'm RootApp"));
 
             Assert.That(httpClient.Get("http://localhost:9902/Sub/Default.aspx"),
-                Is.StringContaining("Hello, I'm an appConfig value from RootApp"));
+                Does.Contain("Hello, I'm an appConfig value from RootApp"));
         }
 
         [Test]
@@ -57,7 +57,7 @@ namespace CassiniDev.Tests
                 .Start();
 
             Assert.That(httpClient.Get("http://localhost:9903/Sub/Default.aspx"),
-                Is.StringContaining("Hello, I'm RootApp"));
+                Does.Contain("Hello, I'm RootApp"));
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace CassiniDev.Tests
                 .Start();
 
             Assert.That(httpClient.Get("http://localhost:9904/Default.aspx"),
-                Is.StringContaining("Hello, I'm OutputtingApp"));
+                Does.Contain("Hello, I'm OutputtingApp"));
 
             Assert.That(output.ToString().Trim(), Is.EqualTo("Hello!"));
         }
@@ -128,7 +128,9 @@ namespace CassiniDev.Tests
 
         public static SolutionFiles FromPathFile(string filepath)
         {
-            return new SolutionFiles(File.ReadAllText(filepath).Trim());
+            var fullFilepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filepath);
+
+            return new SolutionFiles(File.ReadAllText(fullFilepath).Trim());
         }
 
         internal string ResolvePath(string relativePath)

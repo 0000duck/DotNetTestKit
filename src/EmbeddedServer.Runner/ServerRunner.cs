@@ -38,16 +38,23 @@ namespace DotNetTestkit.EmbeddedServerRunner
             var starter = (EnvironmentStarter)domain.CreateInstanceAndUnwrap(
                 starterType.Assembly.GetName(false).Name, starterType.FullName);
 
-            starter.Setup(dllPath, output, error);
+            var assemblyName = starter.Setup(dllPath, output, error);
+
+            //domain.UnhandledException += Domain_UnhandledException;
 
             types.ForEach(typeName => {
-                var environment = starter.ForType(typeName);
+                var environment = starter.ForType(assemblyName, typeName);
 
                 if (environment != null)
                 {
                     environment.Start();
                 }
             });
+        }
+
+        private static void Domain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Console.WriteLine(e.ExceptionObject.ToString());
         }
 
         private static AppDomain CreateAppDomainFor(string dllPath)

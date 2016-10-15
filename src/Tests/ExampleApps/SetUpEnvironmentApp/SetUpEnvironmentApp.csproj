@@ -42,8 +42,13 @@
   <ItemGroup>
     <Compile Include="ExampleEnvironment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerEnvironment.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\EmbeddedServer\EmbeddedServer.csproj">
+      <Project>{187b166b-ef4f-4d34-beb9-c6a4ed71479e}</Project>
+      <Name>EmbeddedServer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\EnvironmentLifecycle\EnvironmentLifecycle.csproj">
       <Project>{b06c4caa-82fa-4845-b72a-2f33d3361de5}</Project>
       <Name>EnvironmentLifecycle</Name>

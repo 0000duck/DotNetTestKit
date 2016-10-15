@@ -22,6 +22,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{8630B911
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9FBA886A-1E2A-47C3-B3BE-4DEDF83CE830}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RootApp", "Tests\ExampleApps\RootApp\RootApp.csproj", "{6ECED88E-E3FD-4167-A9E1-D0CE805D3C48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubRootApp", "Tests\ExampleApps\SubRootApp\SubRootApp.csproj", "{80956496-476C-4AAF-ADC4-B516EB352E72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputtingApp", "Tests\ExampleApps\OutputtingApp\OutputtingApp.csproj", "{58E1DA3F-5941-4DFA-A2A7-2C49109790C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetUpEnvironmentApp", "Tests\ExampleApps\SetUpEnvironmentApp\SetUpEnvironmentApp.csproj", "{89710BAD-4819-4564-9312-37DA9D750838}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CassiniDev.4", "CassiniDev\CassiniDev.4.csproj", "{9AAD02EE-FE79-46BE-87EB-E3D2A376A043}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CassiniDev.Lib4", "CassiniDev\CassiniDev.Lib4.csproj", "{070AE36D-4CE1-4708-BD0F-2896A6F117FC}"
@@ -44,19 +52,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CassiniDev.TestSite", "Samp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExampleApps", "ExampleApps", "{0850CD5A-BC0C-427E-9E52-8C63387AC57B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RootApp", "Tests\ExampleApps\RootApp\RootApp.csproj", "{6ECED88E-E3FD-4167-A9E1-D0CE805D3C48}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubRootApp", "Tests\ExampleApps\SubRootApp\SubRootApp.csproj", "{80956496-476C-4AAF-ADC4-B516EB352E72}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputtingApp", "Tests\ExampleApps\OutputtingApp\OutputtingApp.csproj", "{58E1DA3F-5941-4DFA-A2A7-2C49109790C2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedServer", "EmbeddedServer\EmbeddedServer.csproj", "{187B166B-EF4F-4D34-BEB9-C6A4ED71479E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedServer.Runner", "EmbeddedServer.Runner\EmbeddedServer.Runner.csproj", "{7195F23A-B653-4ACC-9447-BCD9A6444A45}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnvironmentLifecycle", "EnvironmentLifecycle\EnvironmentLifecycle.csproj", "{B06C4CAA-82FA-4845-B72A-2F33D3361DE5}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetUpEnvironmentApp", "Tests\ExampleApps\SetUpEnvironmentApp\SetUpEnvironmentApp.csproj", "{89710BAD-4819-4564-9312-37DA9D750838}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
