@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using System.IO;
 using DotNetTestkit;
+using System.Linq;
 
 namespace CassiniDev.Tests
 {
@@ -15,48 +16,63 @@ namespace CassiniDev.Tests
         [Test]
         public void StartAndStop()
         {
-            using (var server = EmbeddedServer.NewServer(9901)
+            string pageUrl;
+
+            using (var server = EmbeddedServer.NewServer(1)
                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\CassiniDev4.Tests.Web"))
                 .Start())
             {
-                Assert.That(httpClient.Get("http://localhost:9901/Default.aspx"),
+                pageUrl = server.ResolveUrl("Default.aspx");
+
+                Assert.That(httpClient.Get(pageUrl),
                 Does.Contain("Welcome to ASP.NET!"));
             }
 
             try
             {
-                httpClient.Get("http://localhost:9901/Default.aspx");
+                httpClient.Get(pageUrl);
 
-                Assert.Fail("Should not be success");
+                Assert.Fail("Should not be a success");
             } catch (SimpleHttpClient.UnableToConnect e)
             {
             }
         }
 
-
         [Test]
         public void LoadMultipleApps()
         {
-            var server = EmbeddedServer.NewServer(9902)
+            var server = EmbeddedServer.NewServer()
                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
                 .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\SubRootApp"))
                 .Start();
 
-            Assert.That(httpClient.Get("http://localhost:9902/Default.aspx"),
+            Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
                 Does.Contain("Hello, I'm RootApp"));
 
-            Assert.That(httpClient.Get("http://localhost:9902/Sub/Default.aspx"),
+            Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
                 Does.Contain("Hello, I'm an appConfig value from RootApp"));
+        }
+
+        [Test]
+        public void LoadStaticsForSubRootApp()
+        {
+            var server = EmbeddedServer.NewServer()
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
+                .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\SubRootApp"))
+                .Start();
+
+            Assert.That(httpClient.Get(server.ResolveUrl("Sub/static/file.js")),
+                Does.Contain("function"));
         }
 
         [Test]
         public void LoadRootAppAtPath()
         {
-            var server = EmbeddedServer.NewServer(9903)
+            var server = EmbeddedServer.NewServer()
                 .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
                 .Start();
 
-            Assert.That(httpClient.Get("http://localhost:9903/Sub/Default.aspx"),
+            Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
                 Does.Contain("Hello, I'm RootApp"));
         }
 
@@ -65,12 +81,12 @@ namespace CassiniDev.Tests
         {
             var output = new StringWriter();
 
-            var server = EmbeddedServer.NewServer(9904)
+            var server = EmbeddedServer.NewServer()
                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\OutputtingApp"))
                 .WithOutputCollectionTo(output)
                 .Start();
 
-            Assert.That(httpClient.Get("http://localhost:9904/Default.aspx"),
+            Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
                 Does.Contain("Hello, I'm OutputtingApp"));
 
             Assert.That(output.ToString().Trim(), Is.EqualTo("Hello!"));
@@ -114,28 +130,6 @@ namespace CassiniDev.Tests
                     throw new UnableToConnect(url);
                 }                
             }
-        }
-    }
-
-    class SolutionFiles
-    {
-        private readonly string solutionDir;
-
-        public SolutionFiles(string solutionDir)
-        {
-            this.solutionDir = solutionDir;
-        }
-
-        public static SolutionFiles FromPathFile(string filepath)
-        {
-            var fullFilepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filepath);
-
-            return new SolutionFiles(File.ReadAllText(fullFilepath).Trim());
-        }
-
-        internal string ResolvePath(string relativePath)
-        {
-            return Path.Combine(solutionDir, relativePath);
         }
     }
 }

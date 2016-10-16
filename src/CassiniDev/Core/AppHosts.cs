@@ -103,6 +103,11 @@ namespace CassiniDev
             return null;
         }
 
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
+
         private Host CreateHost(string physicalPath, string virtualPath)
         {
             Host host = new Host();

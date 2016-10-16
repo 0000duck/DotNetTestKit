@@ -47,11 +47,12 @@ namespace CassiniDev
 
         //    return new CoreConfigMapPath(physicalPath, fileMap);
         //}
-        public IConfigMapPath Create(string virtualPath, string physicalPath)
+        public IConfigMapPath Create(string virtualPath, string rawPhysicalPath)
         {
             WebConfigurationFileMap fileMap = new WebConfigurationFileMap();
 
             var vpLower = virtualPath.TrimEnd('/').ToLower();
+            var physicalPath = rawPhysicalPath.TrimEnd('/');
 
             if (vpLower == String.Empty)
             {

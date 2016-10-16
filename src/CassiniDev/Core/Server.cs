@@ -502,41 +502,11 @@ namespace CassiniDev
                         try
                         {
                             Socket acceptedSocket = _socket.Accept();
-                            
-                            ThreadPool.QueueUserWorkItem(delegate
-                                {
-                                    if (!_shutdownInProgress)
-                                    {
-                                        //Connection conn = new Connection(this, acceptedSocket, (System.Security.Cryptography.X509Certificates.X509Certificate)certificate);
-                                        Connection conn = new Connection(this, acceptedSocket);
 
-                                        if (conn.WaitForRequestBytes() == 0)
-                                        {
-                                            conn.WriteErrorAndClose(400);
-                                            return;
-                                        }
-
-                                        var wrapper = new HttpConnectionWrapper(conn, this);
-
-                                        string method, version;
-                                        var url = wrapper.ReadInitialHeader(out method, out version);
-
-                                        Console.WriteLine("REQUEST {0} {1}", method, url);
-
-                                        var host = _appHosts.GetHost(url);
-
-                                        Console.WriteLine("Host retrieved for {0}", host.VirtualPath);
-
-                                        if (host == null)
-                                        {
-                                            conn.WriteErrorAndClose(500);
-                                            return;
-                                        }
-
-                                        //IncrementRequestCount();
-                                        host.ProcessRequest(wrapper);
-                                    }
-                                });
+                            new Thread(new ThreadStart(() =>
+                            {
+                                ServeConnection(acceptedSocket);
+                            })).Start();
                         }
                         catch
                         {
@@ -544,6 +514,44 @@ namespace CassiniDev
                         }
                     }
                 });
+        }
+
+        private void ServeConnection(Socket acceptedSocket)
+        {
+            if (!_shutdownInProgress)
+            {
+                //Connection conn = new Connection(this, acceptedSocket, (System.Security.Cryptography.X509Certificates.X509Certificate)certificate);
+                Connection conn = new Connection(this, acceptedSocket);
+
+                if (conn.WaitForRequestBytes() == 0)
+                {
+                    conn.WriteErrorAndClose(400);
+                    return;
+                }
+
+                ProcessRequest(conn);
+            }
+        }
+
+        private void ProcessRequest(Connection conn)
+        {
+            var wrapper = new HttpConnectionWrapper(conn, this);
+
+            string method, version;
+            var url = wrapper.ReadInitialHeader(out method, out version);
+
+            Console.WriteLine("{0} {1}", method, url);
+
+            var host = _appHosts.GetHost(url);
+
+            if (host == null)
+            {
+                conn.WriteErrorAndClose(500);
+                return;
+            }
+
+            //IncrementRequestCount();
+            host.ProcessRequest(wrapper);
         }
 
         private System.Security.Cryptography.X509Certificates.X509Certificate GetServerCertificate(string name)

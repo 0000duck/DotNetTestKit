@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 
 namespace DotNetTestkit
@@ -10,10 +12,13 @@ namespace DotNetTestkit
     public class EmbeddedServer: IDisposable
     {
         private Server server;
+        private static Random random = new Random(DateTime.Now.Millisecond);
+        private readonly Uri baseUrl;
 
         private EmbeddedServer(Server server)
         {
             this.server = server;
+            this.baseUrl = new Uri(server.RootUrl);
         }
 
         public class Builder
@@ -82,14 +87,45 @@ namespace DotNetTestkit
         {
             server.Dispose();
         }
+
+        public static Builder NewServer()
+        {
+            return NewServer(RandomPort());
+        }
+
+        private static int RandomPort()
+        {
+            var randomPort = random.Next(3000, 6000);
+
+            IPAddress ipAddress = Dns.GetHostEntry("localhost").AddressList[0];
+
+            try
+            {
+                TcpListener tcpListener = new TcpListener(ipAddress, randomPort);
+                tcpListener.Start();
+                tcpListener.Stop();
+
+                return randomPort;
+            } catch (SocketException)
+            {
+                return RandomPort();
+            }
+        }
+
+        public string ResolveUrl(string path)
+        {
+            return new Uri(baseUrl, path).ToString();
+        }
     }
 
     class DirectoryMapping
     {
+        private static string DirSeparator = Path.DirectorySeparatorChar.ToString();
+
         public DirectoryMapping(string virtualPath, string physicalPath)
         {
             this.VirtualPath = virtualPath;
-            this.PhysicalPath = physicalPath;
+            this.PhysicalPath = physicalPath.EndsWith(DirSeparator) ? physicalPath : physicalPath + DirSeparator;
         }
 
         public string PhysicalPath { get; private set; }

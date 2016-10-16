@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Policy;
+using System.Text;
 
 namespace DotNetTestkit.EmbeddedServerRunner
 {
@@ -69,8 +70,8 @@ namespace DotNetTestkit.EmbeddedServerRunner
             setup.ApplicationName = name;
             setup.DynamicBase = curDomain.DynamicDirectory;
             setup.CachePath = curDomain.SetupInformation.CachePath;
-            setup.ShadowCopyFiles = curDomain.SetupInformation.ShadowCopyFiles;
             setup.ShadowCopyDirectories = binPath;
+            setup.ShadowCopyFiles = "true";
             setup.ApplicationBase = binPath;
             //setup.se
 

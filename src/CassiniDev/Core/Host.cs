@@ -275,7 +275,9 @@ namespace CassiniDev
 
             try
             {
-                new Request(_appHosts.Server, this, conn).Process();
+                var request = new Request(_appHosts.Server, this, conn);
+
+                request.Process();
             }
             finally
             {

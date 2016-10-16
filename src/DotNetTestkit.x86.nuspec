@@ -1,0 +1,36 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata>
+    <version>0.1.0</version>
+    <authors>Mantas Indrašius</authors>
+    <owners>Mantas Indrašius</owners>
+    <projectUrl>https://github.com/uppin/DotNetTestKit/</projectUrl>
+    <dependencies>
+      <dependency id="Common.Logging" />
+      <dependency id="BouncyCastle" />
+    </dependencies>
+    <id>DotNetTestkit-x86</id>
+    <title>DotNetTestkit for x86 architecture</title>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+
+    <tags>CassiniDev DotNetTestKit</tags>
+    <description>Embedded Development Server capable of hosting multiple applications at a time</description>
+    <summary>Embedded Development Server capable of hosting multiple applications at a time</summary>
+    <language>en-US</language>
+
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Web" targetFramework=".NETFramework4.0" />
+      <frameworkAssembly assemblyName="System.Data" targetFramework=".NETFramework4.0" />
+      <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.0" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.0" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="EmbeddedServer\bin\x86\Release\CassiniDev-lib.dll" target="lib\net40" />
+    <file src="EmbeddedServer\bin\Release\CassiniDev-lib.pdb" target="lib\net40" />
+    <file src="EmbeddedServer\bin\x86\Release\DotNetTestKit.EmbeddedServer.dll" target="lib\net40" />
+    <file src="EmbeddedServer\bin\Release\DotNetTestKit.EmbeddedServer.pdb" target="lib\net40" />
+	<file src="EnvironmentLifecycle\bin\x86\Release\DotNetTestKit.EnvironmentLifecycle.dll" target="lib\net40" />
+    <file src="EnvironmentLifecycle\bin\Release\DotNetTestKit.EnvironmentLifecycle.pdb" target="lib\net40" />
+  </files>
+</package>

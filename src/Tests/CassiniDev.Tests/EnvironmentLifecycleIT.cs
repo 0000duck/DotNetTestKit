@@ -1,4 +1,5 @@
-﻿using DotNetTestkit.EmbeddedServerRunner;
+﻿using DotNetTestkit;
+using DotNetTestkit.EmbeddedServerRunner;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace CassiniDev.Tests
         private StringWriter error;
         private StringWriter output;
 
-        SolutionFiles solutionFiles = SolutionFiles.FromPathFile("solution-dir.txt");
+        SolutionFiles solutionFiles = SolutionFiles.FromSolutionRoot();
         SimpleHttpClient client = new SimpleHttpClient();
 
         [SetUp]
