@@ -62,6 +62,7 @@ namespace DotNetTestkit.EmbeddedServerRunner
         {
             var curDomain = AppDomain.CurrentDomain;
             var binPath = Path.GetDirectoryName(dllPath);
+            //var shadowBin = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             var evidence = new Evidence(curDomain.Evidence);
             var setup = new AppDomainSetup();
@@ -70,7 +71,7 @@ namespace DotNetTestkit.EmbeddedServerRunner
             setup.ApplicationName = name;
             setup.DynamicBase = curDomain.DynamicDirectory;
             setup.CachePath = curDomain.SetupInformation.CachePath;
-            setup.ShadowCopyDirectories = binPath;
+            //setup.ShadowCopyDirectories = shadowBin;
             setup.ShadowCopyFiles = "true";
             setup.ApplicationBase = binPath;
             //setup.se
