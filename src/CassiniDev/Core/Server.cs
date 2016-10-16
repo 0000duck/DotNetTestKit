@@ -44,6 +44,7 @@ using Org.BouncyCastle.Math;
 using System.Security.Cryptography;
 using Org.BouncyCastle.Crypto.Parameters;
 using CassiniDev.Autodeploy;
+using CassiniDev.Core;
 //using Service;
 //using System.Data.Objects;
 
@@ -96,6 +97,10 @@ namespace CassiniDev
         //private Timer _timer;
 
         private string _appId;
+
+        public event EventHandler<HostCreatedEventArgs> HostCreated;
+        public event EventHandler<HostRemovedEventArgs> HostRemoved;
+
         ///<summary>
         ///</summary>
         public string AppId
@@ -233,6 +238,16 @@ namespace CassiniDev
             ObtainProcessToken();
 
             _appHosts = new AppHosts(this, _virtualPath, _physicalPath);
+
+            _appHosts.HostCreated += (s, e) =>
+            {
+                HostCreated?.Invoke(s, e);
+            };
+
+            _appHosts.HostRemoved += (s, e) =>
+            {
+                HostRemoved?.Invoke(s, e);
+            };
 
 #if NET40
             //m_projMonitor = new HostWatchManager();

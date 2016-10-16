@@ -1,1 +1,1 @@
-nunit-console CassiniDev.Tests\bin\x64\Debug\CassiniDev.Tests.dll
+nunit-console CassiniDev.Tests\bin\Release\CassiniDev.Tests.dll

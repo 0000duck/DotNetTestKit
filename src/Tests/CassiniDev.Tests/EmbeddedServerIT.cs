@@ -4,6 +4,7 @@ using System.Net;
 using System.IO;
 using DotNetTestkit;
 using System.Linq;
+using CassiniDev.Core;
 
 namespace CassiniDev.Tests
 {
@@ -18,15 +19,33 @@ namespace CassiniDev.Tests
         {
             string pageUrl;
 
+            HostRemovedEventArgs removedArgs = null;
+
             using (var server = EmbeddedServer.NewServer(1)
                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\CassiniDev4.Tests.Web"))
                 .Start())
             {
+                HostCreatedEventArgs receivedArgs = null;
+
+                server.HostCreated += (s, e) =>
+                {
+                    receivedArgs = e;
+                };
+
+                server.HostRemoved += (s, e) =>
+                {
+                    removedArgs = e;
+                };
+
                 pageUrl = server.ResolveUrl("Default.aspx");
 
-                Assert.That(httpClient.Get(pageUrl),
-                Does.Contain("Welcome to ASP.NET!"));
+                Assert.That(httpClient.Get(pageUrl), Does.Contain("Welcome to ASP.NET!"));
+                Assert.That(receivedArgs, Is.Not.Null);
+                Assert.That(receivedArgs.VirtualPath, Is.EqualTo("/"));
             }
+
+            Assert.That(removedArgs, Is.Not.Null);
+            Assert.That(removedArgs.VirtualPath, Is.EqualTo("/"));
 
             try
             {

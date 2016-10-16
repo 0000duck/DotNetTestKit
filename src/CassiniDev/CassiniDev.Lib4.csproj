@@ -148,6 +148,8 @@
     <Compile Include="Core\ConfigMapPathFactory.cs" />
     <Compile Include="Core\Connection.cs" />
     <Compile Include="Core\Host.cs" />
+    <Compile Include="Core\HostCreatedEventArgs.cs" />
+    <Compile Include="Core\HostRemovedEventArgs.cs" />
     <Compile Include="Core\HttpConnectionWrapper.cs" />
     <Compile Include="Core\Messages.cs" />
     <Compile Include="Core\NtlmAuth.cs" />

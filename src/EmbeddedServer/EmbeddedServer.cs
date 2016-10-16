@@ -1,4 +1,5 @@
 ﻿using CassiniDev;
+using CassiniDev.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,10 +16,23 @@ namespace DotNetTestkit
         private static Random random = new Random(DateTime.Now.Millisecond);
         private readonly Uri baseUrl;
 
+        public event EventHandler<HostCreatedEventArgs> HostCreated;
+        public event EventHandler<HostRemovedEventArgs> HostRemoved;
+
         private EmbeddedServer(Server server)
         {
             this.server = server;
             this.baseUrl = new Uri(server.RootUrl);
+
+            server.HostCreated += (s, e) =>
+            {
+                HostCreated?.Invoke(s, e);
+            };
+
+            server.HostRemoved += (s, e) =>
+            {
+                HostRemoved?.Invoke(s, e);
+            };
         }
 
         public class Builder

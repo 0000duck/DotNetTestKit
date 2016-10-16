@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CassiniDev.Core;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -26,6 +27,9 @@ namespace CassiniDev
         public TextWriter OutputWriter { get; internal set; }
 
         public readonly ApplicationManager ApplicationManager;
+
+        public event EventHandler<HostCreatedEventArgs> HostCreated;
+        public event EventHandler<HostRemovedEventArgs> HostRemoved;
 
         public AppHosts(Server server, string virtualPath, string physicalPath)
         {
@@ -116,6 +120,8 @@ namespace CassiniDev
             host = CreateWorkerAppDomainWithHost(host);
             host.SetConsoleOut(OutputWriter ?? Console.Out);
 
+            HostCreated?.Invoke(this, new HostCreatedEventArgs(virtualPath, physicalPath));
+
             Console.WriteLine("Host created {0}", virtualPath);
 
             return host;
@@ -190,6 +196,7 @@ namespace CassiniDev
 
             if (_hosts.Remove(virtualPath))
             {
+                HostRemoved?.Invoke(this, new HostRemovedEventArgs(virtualPath));
                 Console.WriteLine("Host removed {0}", virtualPath);
                 _numHosts--;
             }
