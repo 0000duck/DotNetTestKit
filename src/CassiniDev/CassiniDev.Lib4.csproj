@@ -151,6 +151,7 @@
     <Compile Include="Core\HostCreatedEventArgs.cs" />
     <Compile Include="Core\HostRemovedEventArgs.cs" />
     <Compile Include="Core\HttpConnectionWrapper.cs" />
+    <Compile Include="Core\KeepAliveTextWriter.cs" />
     <Compile Include="Core\Messages.cs" />
     <Compile Include="Core\NtlmAuth.cs" />
     <Compile Include="Core\Request.cs" />

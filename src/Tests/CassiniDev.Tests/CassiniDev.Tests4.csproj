@@ -117,6 +117,7 @@
     <Compile Include="EmbeddedServerIT.cs" />
     <Compile Include="EnvironmentLifecycleIT.cs" />
     <Compile Include="IssueResolution.cs" />
+    <Compile Include="KeepAliveTextWriterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

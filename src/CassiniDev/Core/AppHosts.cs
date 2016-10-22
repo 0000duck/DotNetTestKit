@@ -117,8 +117,10 @@ namespace CassiniDev
             Host host = new Host();
             host.Configure(this, Server.Port, virtualPath, physicalPath, Server.RequireAuthentication, Server.DisableDirectoryListing);
 
+            var output = new KeepAliveTextWriter(OutputWriter ?? Console.Out);
+
             host = CreateWorkerAppDomainWithHost(host);
-            host.SetConsoleOut(OutputWriter ?? Console.Out);
+            host.SetConsoleOut(output);
 
             HostCreated?.Invoke(this, new HostCreatedEventArgs(virtualPath, physicalPath));
 
