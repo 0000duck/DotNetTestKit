@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using CassiniDev.Core;
 
 #endregion
 
@@ -67,6 +68,7 @@ namespace CassiniDev
         private AppHosts _appHosts;
 
         private string _virtualPath;
+        private KeepAliveTextWriter outputWriter;
 
         public AppDomain AppDomain
         {
@@ -120,7 +122,9 @@ namespace CassiniDev
 
         public void SetConsoleOut(TextWriter writer)
         {
-            Console.SetOut(writer);
+            this.outputWriter = new KeepAliveTextWriter(writer);
+
+            Console.SetOut(outputWriter);
         }
 
         public string VirtualPath

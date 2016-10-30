@@ -75,6 +75,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CassiniDev\CassiniDev.Lib.csproj">
+      <Project>{4EF6FE65-0BDE-4AC4-B9CF-F2D8FFE886C1}</Project>
+      <Name>CassiniDev.Lib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EmbeddedServer\EmbeddedServer.csproj">
       <Project>{187b166b-ef4f-4d34-beb9-c6a4ed71479e}</Project>
       <Name>EmbeddedServer</Name>

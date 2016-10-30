@@ -1,4 +1,5 @@
-﻿using DotNetTestkit.EnvironmentLifecycle;
+﻿using CassiniDev.Core;
+using DotNetTestkit.EnvironmentLifecycle;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,6 +13,7 @@ namespace DotNetTestkit.EmbeddedServerRunner
     public class ServerRunner
     {
         private static int domainId = 1;
+        private static List<TextWriter> openWriters = new List<TextWriter>();
 
         public static void RunWith(ProgramOptions options)
         {
@@ -39,7 +41,17 @@ namespace DotNetTestkit.EmbeddedServerRunner
             var starter = (EnvironmentStarter)domain.CreateInstanceAndUnwrap(
                 starterType.Assembly.GetName(false).Name, starterType.FullName);
 
-            var assemblyName = starter.Setup(dllPath, output, error);
+            var outputWriter = new KeepAliveTextWriter(output);
+            var errorWriter = new KeepAliveTextWriter(error);
+
+            var assemblyName = starter.Setup(dllPath,
+                outputWriter,
+                errorWriter);
+
+            openWriters.Add(outputWriter);
+            openWriters.Add(errorWriter);
+
+            Console.WriteLine("Started for {0}", dllPath);
 
             //domain.UnhandledException += Domain_UnhandledException;
 

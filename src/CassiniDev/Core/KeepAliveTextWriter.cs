@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting;
 using System.Text;
 
 namespace CassiniDev.Core
@@ -10,8 +11,6 @@ namespace CassiniDev.Core
     public class KeepAliveTextWriter : StreamWriter
     {
         private TextWriter textWriter;
-        private bool running;
-        //private readonly Timer flusher;
 
         public KeepAliveTextWriter(TextWriter textWriter) : this(new CopyingOutputStream(textWriter))
         {
@@ -20,18 +19,19 @@ namespace CassiniDev.Core
         public KeepAliveTextWriter(Stream stream) : base(stream)
         {
             AutoFlush = true;
-
-            //flusher = new Timer(new TimerCallback((obj) =>
-            //{
-            //    flus
-            //}));
-
-            //flusher.Start();
         }
 
-        protected override void Dispose(bool disposing)
+        public override void WriteLine()
         {
-            base.Dispose(disposing);
+            try
+            {
+                base.WriteLine();
+            } catch (RemotingException ex)
+            {
+                var message = string.Format("Console disconnected on {0}", AppDomain.CurrentDomain.FriendlyName);
+
+                throw new TextWriterDisconnected(message, ex);
+            }
         }
 
         public override object InitializeLifetimeService()
@@ -110,6 +110,19 @@ namespace CassiniDev.Core
             }
         }
 
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            lock (bufferStreamLock)
+            {
+                bufferStream.Write(buffer, offset, count);
+
+                byte newLine = (byte)'\n';
+                var newLines = Array.FindAll<byte>(buffer, b => b == newLine).ToArray();
+
+                Flush();
+            }
+        }
+
         public override int Read(byte[] buffer, int offset, int count)
         {
             throw new NotSupportedException();
@@ -125,17 +138,16 @@ namespace CassiniDev.Core
             throw new NotSupportedException();
         }
 
-        public override void Write(byte[] buffer, int offset, int count)
+        public override object InitializeLifetimeService()
         {
-            lock (bufferStreamLock)
-            {
-                bufferStream.Write(buffer, offset, count);
+            return null;
+        }
+    }
 
-                byte newLine = (byte)'\n';
-                var newLines = Array.FindAll<byte>(buffer, b => b == newLine).ToArray();
-
-                Flush();
-            }
+    public class TextWriterDisconnected : Exception
+    {
+        public TextWriterDisconnected(string message, Exception innerException) : base(message, innerException)
+        {
         }
     }
 }

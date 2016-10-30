@@ -114,6 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandLineFixture.cs" />
+    <Compile Include="DynamicForwardingTextWriterIT.cs" />
     <Compile Include="EmbeddedServerIT.cs" />
     <Compile Include="EnvironmentLifecycleIT.cs" />
     <Compile Include="IssueResolution.cs" />

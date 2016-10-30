@@ -162,6 +162,7 @@
     <Compile Include="Misc\CommandLineArguments.cs" />
     <Compile Include="Misc\CommandLineParser.cs" />
     <Compile Include="Misc\Common.cs" />
+    <Compile Include="Misc\DynamicForwardingTextWriter.cs" />
     <Compile Include="Misc\HostsFile.cs" />
     <Compile Include="Misc\Interop.cs" />
     <Compile Include="Misc\NetworkUtils.cs" />

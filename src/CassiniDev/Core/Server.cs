@@ -557,16 +557,24 @@ namespace CassiniDev
 
             Console.WriteLine("{0} {1}", method, url);
 
-            var host = _appHosts.GetHost(url);
-
-            if (host == null)
+            try
             {
-                conn.WriteErrorAndClose(500);
-                return;
-            }
+                var host = _appHosts.GetHost(url);
 
-            //IncrementRequestCount();
-            host.ProcessRequest(wrapper);
+                if (host == null)
+                {
+                    conn.WriteErrorAndClose(500);
+                    return;
+                }
+
+                host.ProcessRequest(wrapper);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+
+                conn.WriteErrorAndClose(502);
+            }
         }
 
         private System.Security.Cryptography.X509Certificates.X509Certificate GetServerCertificate(string name)
