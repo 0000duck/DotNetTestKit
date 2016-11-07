@@ -122,7 +122,10 @@ namespace CassiniDev
             host = CreateWorkerAppDomainWithHost(host);
             host.SetConsoleOut(output);
 
-            HostCreated?.Invoke(this, new HostCreatedEventArgs(virtualPath, physicalPath));
+            if (HostCreated != null)
+            {
+                HostCreated.Invoke(this, new HostCreatedEventArgs(virtualPath, physicalPath));
+            }
 
             Console.WriteLine("Host created {0}", virtualPath);
 
@@ -198,7 +201,10 @@ namespace CassiniDev
 
             if (_hosts.Remove(virtualPath))
             {
-                HostRemoved?.Invoke(this, new HostRemovedEventArgs(virtualPath));
+                if (HostRemoved != null)
+                {
+                    HostRemoved.Invoke(this, new HostRemovedEventArgs(virtualPath));
+                }
                 Console.WriteLine("Host removed {0}", virtualPath);
                 _numHosts--;
             }

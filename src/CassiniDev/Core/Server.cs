@@ -241,12 +241,18 @@ namespace CassiniDev
 
             _appHosts.HostCreated += (s, e) =>
             {
-                HostCreated?.Invoke(s, e);
+                if (HostCreated != null)
+                {
+                    HostCreated.Invoke(s, e);
+                }
             };
 
             _appHosts.HostRemoved += (s, e) =>
             {
-                HostRemoved?.Invoke(s, e);
+                if (HostRemoved != null)
+                {
+                    HostRemoved.Invoke(s, e);
+                }
             };
 
 #if NET40
