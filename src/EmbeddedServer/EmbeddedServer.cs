@@ -26,12 +26,18 @@ namespace DotNetTestkit
 
             server.HostCreated += (s, e) =>
             {
-                HostCreated?.Invoke(s, e);
+                if (HostCreated != null)
+                {
+                    HostCreated.Invoke(s, e);
+                }
             };
 
             server.HostRemoved += (s, e) =>
             {
-                HostRemoved?.Invoke(s, e);
+                if (HostRemoved != null)
+                {
+                    HostRemoved.Invoke(s, e);
+                }
             };
         }
 
