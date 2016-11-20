@@ -18,6 +18,7 @@ namespace DotNetTestkit
 
         public event EventHandler<HostCreatedEventArgs> HostCreated;
         public event EventHandler<HostRemovedEventArgs> HostRemoved;
+        public event EventHandler<HostRemovedEventArgs> HostRemovedWithStableBinDir;
 
         private EmbeddedServer(Server server)
         {
@@ -28,7 +29,7 @@ namespace DotNetTestkit
             {
                 if (HostCreated != null)
                 {
-                    HostCreated.Invoke(s, e);
+                    HostCreated(s, e);
                 }
             };
 
@@ -36,7 +37,19 @@ namespace DotNetTestkit
             {
                 if (HostRemoved != null)
                 {
-                    HostRemoved.Invoke(s, e);
+                    HostRemoved(s, e);
+                }
+
+                if (HostRemovedWithStableBinDir != null)
+                {
+                    var binDir = Path.Combine(e.PhysicalPath, "bin");
+
+                    FileWatcher.For("*.dll")
+                        .InDirectory(binDir)
+                        .WatchUntilNoChangesFor(1000, () =>
+                        {
+                            HostRemovedWithStableBinDir(this, e);
+                        });
                 }
             };
         }

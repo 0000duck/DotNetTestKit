@@ -195,7 +195,7 @@ namespace CassiniDev
             return bestMatch;
         }
 
-        internal void HostStopped(string virtualPath)
+        internal void HostStopped(string virtualPath, string physicalPath)
         {
             Console.WriteLine("Host stopped {0}", virtualPath);
 
@@ -203,8 +203,9 @@ namespace CassiniDev
             {
                 if (HostRemoved != null)
                 {
-                    HostRemoved.Invoke(this, new HostRemovedEventArgs(virtualPath));
+                    HostRemoved(this, new HostRemovedEventArgs(virtualPath, physicalPath));
                 }
+
                 Console.WriteLine("Host removed {0}", virtualPath);
                 _numHosts--;
             }

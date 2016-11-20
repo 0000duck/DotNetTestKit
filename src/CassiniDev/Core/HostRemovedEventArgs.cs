@@ -7,11 +7,21 @@ namespace CassiniDev.Core
 {
     public class HostRemovedEventArgs : EventArgs
     {
-        private string virtualPath;
+        private readonly string physicalPath;
+        private readonly string virtualPath;
 
-        public HostRemovedEventArgs(string virtualPath)
+        public HostRemovedEventArgs(string virtualPath, string physicalPath)
         {
             this.virtualPath = virtualPath;
+            this.physicalPath = physicalPath;
+        }
+
+        public string PhysicalPath
+        {
+            get
+            {
+                return physicalPath;
+            }
         }
 
         public string VirtualPath
@@ -19,12 +29,7 @@ namespace CassiniDev.Core
             get
             {
                 return virtualPath;
-            }
-
-            set
-            {
-                virtualPath = value;
-            }
+            }            
         }
     }
 }

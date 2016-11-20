@@ -140,7 +140,7 @@ namespace CassiniDev
 
             if (_appHosts != null)
             {
-                _appHosts.HostStopped(_virtualPath);
+                _appHosts.HostStopped(_virtualPath, _physicalPath);
             }
 
             // Make sure all the pending calls complete before this Object is unregistered.

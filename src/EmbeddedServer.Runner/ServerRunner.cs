@@ -12,93 +12,64 @@ namespace DotNetTestkit.EmbeddedServerRunner
 {
     public class ServerRunner
     {
-        private static int domainId = 1;
-        private static List<TextWriter> openWriters = new List<TextWriter>();
-
-        public static void RunWith(ProgramOptions options)
+        public static CombinedEnvironment RunWith(ProgramOptions options)
         {
-            RunWith(options, Console.Out, Console.Error);
+            return RunWith(options, Console.Out, Console.Error);
         }
 
-        public static void RunWith(ProgramOptions options, TextWriter output, TextWriter error)
+        public static CombinedEnvironment RunWith(ProgramOptions options, TextWriter output, TextWriter error)
         {
-            StartEnvironments(options, output, error);
-            StartServerWithVirtualMappings(options);
+            var env = new CombinedEnvironment(options, output, error);
+
+            env.Start();
+
+            return env;
+        }
+    }
+
+    public class CombinedEnvironment: IDisposable
+    {
+        private TextWriter error;
+        private ProgramOptions options;
+        private TextWriter output;
+        private List<IEnvironmentLifecycle> environments = new List<IEnvironmentLifecycle>();
+
+        public CombinedEnvironment(ProgramOptions options, TextWriter output, TextWriter error)
+        {
+            this.options = options;
+            this.output = output;
+            this.error = error;
         }
 
-        private static void StartEnvironments(ProgramOptions options, TextWriter output, TextWriter error)
+        internal void Start()
         {
-            options.Dlls.ForEach(dllPath => {
-                StartForDomain(CreateAppDomainFor(dllPath), dllPath, options.Types, output, error);
+            environments.AddRange(StartEnvironments(options, output, error));
+            environments.AddRange(StartServerWithVirtualMappings(options));
+        }
+
+        private static IEnumerable<IEnvironmentLifecycle> StartEnvironments(ProgramOptions options, TextWriter output, TextWriter error)
+        {
+            return options.Dlls.SelectMany(dllPath => {
+                return StartForDomain(dllPath, options.Types, output, error);
             });
 
             //StartEnvironments(assemblies, options.Types);
         }
 
-        private static void StartForDomain(AppDomain domain, string dllPath, List<string> types, TextWriter output, TextWriter error)
+        private static IEnumerable<IEnvironmentLifecycle> StartForDomain(string dllPath, List<string> types, TextWriter output, TextWriter error)
         {
-            var starterType = typeof(EnvironmentStarter);
-            var starter = (EnvironmentStarter)domain.CreateInstanceAndUnwrap(
-                starterType.Assembly.GetName(false).Name, starterType.FullName);
+            var binPath = Path.GetDirectoryName(dllPath);
+            var watchedEnvironment = new EnvironmentsBinPathWatch(binPath,
+                new AppDomainScopedEnvironment(dllPath, types, output, error));
 
-            var outputWriter = new KeepAliveTextWriter(output);
-            var errorWriter = new KeepAliveTextWriter(error);
+            watchedEnvironment.Start();
 
-            var assemblyName = starter.Setup(dllPath,
-                outputWriter,
-                errorWriter);
-
-            openWriters.Add(outputWriter);
-            openWriters.Add(errorWriter);
-
-            Console.WriteLine("Started for {0}", dllPath);
-
-            //domain.UnhandledException += Domain_UnhandledException;
-
-            types.ForEach(typeName => {
-                var environment = starter.ForType(assemblyName, typeName);
-
-                if (environment != null)
-                {
-                    environment.Start();
-                }
-            });
+            return new List<IEnvironmentLifecycle> { watchedEnvironment };
         }
 
         private static void Domain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Console.WriteLine(e.ExceptionObject.ToString());
-        }
-
-        private static AppDomain CreateAppDomainFor(string dllPath)
-        {
-            var curDomain = AppDomain.CurrentDomain;
-            var binPath = Path.GetDirectoryName(dllPath);
-            var shadowBin = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-
-            var evidence = new Evidence(curDomain.Evidence);
-            var setup = new AppDomainSetup();
-            var name = NewDomainName();
-
-            setup.ApplicationName = name;
-            setup.DynamicBase = curDomain.DynamicDirectory;
-            setup.CachePath = curDomain.SetupInformation.CachePath;
-            setup.ShadowCopyDirectories = shadowBin;
-            setup.ShadowCopyFiles = "true";
-            setup.ApplicationBase = binPath;
-            //setup.se
-
-            //setup.ConfigurationFile = Path.Combine(dirPath, configFile);
-            setup.PrivateBinPath = binPath;
-
-            Console.WriteLine("Starting Environment for {0}", dllPath);
-
-            return AppDomain.CreateDomain(name, evidence, setup);
-        }
-
-        private static string NewDomainName()
-        {
-            return string.Format("Environment-{0}", domainId++);
         }
 
         private static void StartEnvironments(List<Assembly> assemblies, List<string> types)
@@ -144,7 +115,7 @@ namespace DotNetTestkit.EmbeddedServerRunner
             }
         }
 
-        private static void StartServerWithVirtualMappings(ProgramOptions options)
+        private static IEnumerable<IEnvironmentLifecycle> StartServerWithVirtualMappings(ProgramOptions options)
         {
             if (options.VirtualPathMappings.Count > 0)
             {
@@ -156,11 +127,30 @@ namespace DotNetTestkit.EmbeddedServerRunner
                     serverPrototype = serverPrototype.WithVirtualDirectory(mapping.VirtualPath, mapping.PhysicalPath);
                 }
 
-                serverPrototype.Start();
+                var server = serverPrototype.Start();
 
                 Console.WriteLine("Server listening at {0}", options.Port);
+
+                return new List<IEnvironmentLifecycle>() {
+                    new EmbeddedServerLifecycle(server)
+                };
             }
+
+            return new List<IEnvironmentLifecycle>();
         }
 
+        public void Dispose()
+        {
+            environments.ForEach(env =>
+            {
+                try
+                {
+                    env.Stop();
+                } catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            });
+        }
     }
 }

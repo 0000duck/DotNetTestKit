@@ -65,6 +65,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppDomainScopedEnvironment.cs" />
+    <Compile Include="EmbeddedServerLifecycle.cs" />
+    <Compile Include="EnvironmentLifecycleListWrapper.cs" />
+    <Compile Include="EnvironmentsWatch.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProgramOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

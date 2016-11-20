@@ -119,11 +119,11 @@ namespace DotNetTestkit.EnvironmentLifecycle
     {
         public IEnvironmentLifecycle ForType(AssemblyName assemblyName, string typeName)
         {
-            Console.WriteLine("For Type {0}", typeName);
+            //Console.WriteLine("For Type {0}", typeName);
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                Console.WriteLine(assembly.FullName);
+                //Console.WriteLine(assembly.FullName);
 
                 if (assembly.GetName().FullName.Equals(assemblyName.FullName))
                 {
