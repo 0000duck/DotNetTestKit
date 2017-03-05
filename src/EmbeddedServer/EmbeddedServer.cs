@@ -54,15 +54,35 @@ namespace DotNetTestkit
             };
         }
 
+        public class ServerSetup
+        {
+            private readonly int managementPort;
+            private readonly Server server;
+
+            public ServerSetup(Server server, int managementPort)
+            {
+                this.server = server;
+                this.managementPort = managementPort;
+            }
+        }
+
         public class Builder
         {
             private int port;
             private List<DirectoryMapping> virtualDirectories = new List<DirectoryMapping>();
+            private List<Action<ServerSetup>> setupActions = new List<Action<ServerSetup>>();
             private TextWriter outputWriter;
 
             protected internal Builder(int port)
             {
                 this.port = port;
+            }
+
+            public Builder WithSetup(Action<ServerSetup> setupAction)
+            {
+                this.setupActions.Add(setupAction);
+
+                return this;
             }
 
             public Builder WithVirtualDirectory(string virtualPath, string directoryPath)
@@ -100,7 +120,15 @@ namespace DotNetTestkit
 
                 server.OutputWriter = outputWriter;
 
-                server.Start();
+                server.Start(info =>
+                {
+                    var serverSetup = new ServerSetup(server, info.Port);
+
+                    foreach (var setupAction in setupActions.ToArray())
+                    {
+                        setupAction(serverSetup);
+                    }
+                });
 
                 AppDomain.CurrentDomain.DomainUnload += (e, a) =>
                 {

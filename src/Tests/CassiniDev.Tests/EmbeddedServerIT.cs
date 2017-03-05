@@ -21,7 +21,7 @@ namespace CassiniDev.Tests
 
             HostRemovedEventArgs removedArgs = null;
 
-            using (var server = EmbeddedServer.NewServer(1)
+            using (var server = EmbeddedServer.NewServer()
                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\CassiniDev4.Tests.Web"))
                 .Start())
             {
@@ -58,41 +58,64 @@ namespace CassiniDev.Tests
         }
 
         [Test]
+        public void SetupAppWithStart()
+        {
+            int setupCalled = 0;
+
+            using (var server = EmbeddedServer.NewServer()
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
+                .WithSetup((serverSetUp) =>
+                {
+                    setupCalled++;
+                })
+                .Start())
+            {
+                Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
+                    Does.Contain("Hello, I'm RootApp"));
+
+                Assert.That(setupCalled, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
         public void LoadMultipleApps()
         {
-            var server = EmbeddedServer.NewServer()
+            using (var server = EmbeddedServer.NewServer()
                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
                 .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\SubRootApp"))
-                .Start();
+                .Start())
+            {            
+                Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
+                    Does.Contain("Hello, I'm RootApp"));
 
-            Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
-                Does.Contain("Hello, I'm RootApp"));
-
-            Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
-                Does.Contain("Hello, I'm an appConfig value from RootApp"));
+                Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
+                    Does.Contain("Hello, I'm an appConfig value from RootApp"));
+            }
         }
 
         [Test]
         public void LoadStaticsForSubRootApp()
         {
-            var server = EmbeddedServer.NewServer()
+            using (var server = EmbeddedServer.NewServer()
                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
                 .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\SubRootApp"))
-                .Start();
-
-            Assert.That(httpClient.Get(server.ResolveUrl("Sub/static/file.js")),
-                Does.Contain("function"));
+                .Start())
+            {
+                Assert.That(httpClient.Get(server.ResolveUrl("Sub/static/file.js")),
+                    Does.Contain("function"));
+            }
         }
 
         [Test]
         public void LoadRootAppAtPath()
         {
-            var server = EmbeddedServer.NewServer()
+            using (var server = EmbeddedServer.NewServer()
                 .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
-                .Start();
-
-            Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
-                Does.Contain("Hello, I'm RootApp"));
+                .Start())
+            {
+                Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
+                    Does.Contain("Hello, I'm RootApp"));
+            }
         }
 
         [Test]
@@ -100,15 +123,16 @@ namespace CassiniDev.Tests
         {
             var output = new StringWriter();
 
-            var server = EmbeddedServer.NewServer()
+            using (var server = EmbeddedServer.NewServer()
                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\OutputtingApp"))
                 .WithOutputCollectionTo(output)
-                .Start();
+                .Start())
+            {
+                Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
+                    Does.Contain("Hello, I'm OutputtingApp"));
 
-            Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
-                Does.Contain("Hello, I'm OutputtingApp"));
-
-            Assert.That(output.ToString().Trim(), Is.EqualTo("Hello!"));
+                Assert.That(output.ToString().Trim(), Is.EqualTo("Hello!"));
+            }
         }
     }
 

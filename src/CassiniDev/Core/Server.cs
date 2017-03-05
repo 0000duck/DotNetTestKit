@@ -91,6 +91,7 @@ namespace CassiniDev
         private bool _shutdownInProgress;
 
         private Socket _socket;
+        private Socket _managementSocket;
 
         private AppHosts _appHosts;
 
@@ -493,10 +494,27 @@ namespace CassiniDev
         ///</summary>
         public void Start()
         {
-            _socket = CreateSocketBindAndListen(AddressFamily.InterNetwork, _ipAddress, _port);
-            
+            Start(_ => { });
+        }
+
+        ///<summary>
+        ///</summary>
+        public void Start(Action<ServerInfo> setupAction)
+        {
+            _managementSocket = CreateSocketBindAndListen(AddressFamily.InterNetwork, _ipAddress, 0);
+
+            var serverInfo = new ServerInfo(((IPEndPoint)_managementSocket.LocalEndPoint).Port);
+
+            try
+            {
+                setupAction(serverInfo);
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
             //_applicationPaths = _Host.GetApplicationVirtualPaths();
-            
+
             //start the timer
             //DecrementRequestCount();
 
@@ -516,25 +534,32 @@ namespace CassiniDev
 
             //ar cert = GetServerCertificate("localhost");
 
-            ThreadPool.QueueUserWorkItem(delegate
-                {
-                    while (!_shutdownInProgress)
-                    {
-                        try
-                        {
-                            Socket acceptedSocket = _socket.Accept();
+            _socket = CreateSocketBindAndListen(AddressFamily.InterNetwork, _ipAddress, _port);
 
-                            new Thread(new ThreadStart(() =>
-                            {
-                                ServeConnection(acceptedSocket);
-                            })).Start();
-                        }
-                        catch
+            ServeSocket(_socket);
+        }
+
+        private void ServeSocket(Socket socket)
+        {
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                while (!_shutdownInProgress)
+                {
+                    try
+                    {
+                        Socket acceptedSocket = socket.Accept();
+
+                        new Thread(new ThreadStart(() =>
                         {
-                            Thread.Sleep(100);
-                        }
+                            ServeConnection(acceptedSocket);
+                        })).Start();
                     }
-                });
+                    catch
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
+            });
         }
 
         private void ServeConnection(Socket acceptedSocket)
@@ -791,6 +816,11 @@ namespace CassiniDev
                 {
                     _socket.Close();
                 }
+
+                if (_managementSocket != null)
+                {
+                    _managementSocket.Close();
+                }
             }
             // ReSharper disable EmptyGeneralCatchClause
             catch
@@ -801,6 +831,7 @@ namespace CassiniDev
             finally
             {
                 _socket = null;
+                _managementSocket = null;
             }
 
             try
