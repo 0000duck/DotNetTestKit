@@ -113,10 +113,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Execution.cs" />
     <Compile Include="CommandLineFixture.cs" />
     <Compile Include="DynamicForwardingTextWriterIT.cs" />
     <Compile Include="EmbeddedServerIT.cs" />
     <Compile Include="EnvironmentLifecycleIT.cs" />
+    <Compile Include="FileWatcherIT.cs" />
     <Compile Include="IssueResolution.cs" />
     <Compile Include="KeepAliveTextWriterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

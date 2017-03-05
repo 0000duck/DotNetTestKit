@@ -31,6 +31,6 @@
     <file src="EmbeddedServer\bin\Release\DotNetTestKit.EmbeddedServer.dll" target="lib\net40" />
     <file src="EmbeddedServer\bin\Release\DotNetTestKit.EmbeddedServer.pdb" target="lib\net40" />
     <file src="EnvironmentLifecycle\bin\Release\DotNetTestKit.EnvironmentLifecycle.pdb" target="lib\net40" />
-	<file src="EnvironmentLifecycle\bin\Release\DotNetTestKit.EnvironmentLifecycle.dll" target="lib\net40" />
+	  <file src="EnvironmentLifecycle\bin\Release\DotNetTestKit.EnvironmentLifecycle.dll" target="lib\net40" />
   </files>
 </package>

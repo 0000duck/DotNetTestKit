@@ -30,6 +30,7 @@ namespace DotNetTestkit.EmbeddedServerRunner
         {
             var starterType = typeof(EnvironmentStarter);
             var domain = CreateAppDomainFor(dllPath);
+
             var starter = (EnvironmentStarter)domain.CreateInstanceAndUnwrap(
                 starterType.Assembly.GetName(false).Name, starterType.FullName);
 
@@ -96,9 +97,9 @@ namespace DotNetTestkit.EmbeddedServerRunner
             ////setup.ConfigurationFile = Path.Combine(dirPath, configFile);
             //setup.PrivateBinPath = binPath;
 
-            Console.WriteLine("Starting Environment for {0}", dllPath);
+            var domain = AppDomain.CreateDomain(name, evidence, binPath, null, true);
 
-            return AppDomain.CreateDomain(name, evidence, binPath, null, true);
+            return domain;
         }
 
         private static string NewDomainName()

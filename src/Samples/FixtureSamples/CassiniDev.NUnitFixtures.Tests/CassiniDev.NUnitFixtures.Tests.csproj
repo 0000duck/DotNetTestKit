@@ -73,7 +73,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppDomainUnloadedExceptionFixture.cs" />
     <Compile Include="CacheControlFixture.cs" />
     <Compile Include="CassiniDevBrowserTestFixture.cs" />
     <Compile Include="CassiniDevNUnitFixture.cs" />

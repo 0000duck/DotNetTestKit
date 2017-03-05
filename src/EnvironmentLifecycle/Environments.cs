@@ -22,6 +22,11 @@ namespace DotNetTestkit.EnvironmentLifecycle
 
         public static IEnvironmentLifecycle ForType(Type type)
         {
+            if (typeof(IEnvironmentLifecycle).IsAssignableFrom(type))
+            {
+                return (IEnvironmentLifecycle) Activator.CreateInstance(type);
+            }
+
             var environmentTypes = type.GetCustomAttributes(typeof(SetUpEnvironmentAttribute), true)
                 .Select(attr => (SetUpEnvironmentAttribute)attr)
                 .SelectMany(attr => attr.Environments);
@@ -119,19 +124,19 @@ namespace DotNetTestkit.EnvironmentLifecycle
     {
         public IEnvironmentLifecycle ForType(AssemblyName assemblyName, string typeName)
         {
-            //Console.WriteLine("For Type {0}", typeName);
-
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                //Console.WriteLine(assembly.FullName);
-
                 if (assembly.GetName().FullName.Equals(assemblyName.FullName))
                 {
                     var type = assembly.GetType(typeName);
 
                     if (type != null)
                     {
-                        return new RemoteEnvironmentLifecycle(Environments.ForType(type));
+                        var env = Environments.ForType(type);
+
+                        Console.WriteLine("Starting {0}", env.GetType().FullName);
+
+                        return new RemoteEnvironmentLifecycle(env);
                     }
                 }
             }

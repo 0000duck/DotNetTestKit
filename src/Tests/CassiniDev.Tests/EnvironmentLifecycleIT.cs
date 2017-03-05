@@ -40,6 +40,19 @@ namespace CassiniDev.Tests
         }
 
         [Test]
+        public void StartSimpleEnvironmentWithDirectReferenceToLifecycle()
+        {
+            ServerRunner.RunWith(
+                EnvironmentOptionsTo(
+                    dllPath: "Tests\\ExampleApps\\SetUpEnvironmentApp\\bin\\SetUpEnvironmentApp.dll",
+                    typeName: "SetUpEnvironmentApp.ExampleEnvironmentLifecycle"),
+                output: output,
+                error: error);
+
+            Assert.That(output.ToString(), Does.Contain("Started"));
+        }
+
+        [Test]
         public void StartServerEnvironment()
         {
             ServerRunner.RunWith(
@@ -68,7 +81,7 @@ namespace CassiniDev.Tests
 
                     EmptyDir(binDirPath);
 
-                    Eventually(() =>
+                    Execution.Eventually(() =>
                     {
                         try
                         {
@@ -99,7 +112,7 @@ namespace CassiniDev.Tests
 
                 CopyFilesTo(binSourcePath, binDirPath);
 
-                Eventually(() => Assert.That(client.Get("http://localhost:9901/"), Is.Not.Empty));
+                Execution.Eventually(() => Assert.That(client.Get("http://localhost:9901/"), Is.Not.Empty));
             }
         }
 
@@ -157,42 +170,6 @@ namespace CassiniDev.Tests
             options.AddEnvironmentClass(typeName);
 
             return options;
-        }
-
-
-        private void Eventually(Action retriable)
-        {
-            Exception exceptionToThrow = null;
-
-            TryWithCatch(retriable, out exceptionToThrow);
-
-            var startTime = DateTime.Now;
-
-            while (DateTime.Now.Subtract(startTime).TotalMilliseconds < 5000)
-            {
-                TryWithCatch(retriable, out exceptionToThrow);
-
-                Thread.Sleep(100);
-            }
-
-            if (exceptionToThrow != null)
-            {
-                throw exceptionToThrow;
-            }
-        }
-
-        private void TryWithCatch(Action retriable, out Exception exceptionToThrow)
-        {
-            try
-            {
-                retriable();
-                exceptionToThrow = null;
-                return;
-            }
-            catch (Exception ex)
-            {
-                exceptionToThrow = ex;
-            }
         }
     }
 }

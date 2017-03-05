@@ -15,7 +15,47 @@ namespace DotNetTestkit
         private readonly BlockingCollection<FileSystemEventArgs> eventQueue = new BlockingCollection<FileSystemEventArgs>();
         private readonly HashSet<string> inexsistantDirs;
         private bool disposed = false;
+
+        private readonly List<BlockingCollection<FileSystemEventArgs>> subscriberQueues = new List<BlockingCollection<FileSystemEventArgs>>();
+
+        public void Subscribe(Action<FileSystemEventArgs> acceptFileSystemArgs)
+        {
+            var subscriberQueue = SubscribeQueue();
+
+            Task.Factory.StartNew(() =>
+            {
+                while (!disposed)
+                {
+                    FileSystemEventArgs args;
+
+                    if (subscriberQueue.TryTake(out args, 100))
+                    {
+                        try
+                        {
+                            acceptFileSystemArgs(args);
+                        } catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
+                    }
+                };
+            });
+        }
+
         private readonly Thread inexistantDirWatch;
+        private readonly Thread subscriberQueueCopier;
+
+        private BlockingCollection<FileSystemEventArgs> SubscribeQueue()
+        {
+            var queue = new BlockingCollection<FileSystemEventArgs>();
+
+            lock(subscriberQueues)
+            {
+                subscriberQueues.Add(queue);
+            }
+
+            return queue;
+        }
 
         private FileWatcher(string pattern, List<string> directories)
         {
@@ -47,6 +87,26 @@ namespace DotNetTestkit
             });
 
             inexistantDirWatch.Start();
+
+            this.subscriberQueueCopier = new Thread(() =>
+            {
+                while (!disposed)
+                {
+                    FileSystemEventArgs args;
+
+                    if (!eventQueue.TryTake(out args, 100))
+                    {
+                        continue;
+                    }
+
+                    foreach (var queue in subscriberQueues.ToArray())
+                    {
+                        queue.Add(args);
+                    }
+                }
+            });
+
+            subscriberQueueCopier.Start();
         }
 
         private void StartWatching(string dir)
@@ -64,24 +124,54 @@ namespace DotNetTestkit
 
         public Task CompleteWhenNoChangesFor(int millis)
         {
-            return Task.Factory.StartNew(() =>
+            return WithSubscribedQueue(queue =>
             {
                 FileSystemEventArgs args;
 
-                while (eventQueue.TryTake(out args, millis)) { };
+                while (queue.TryTake(out args, millis)) { };
             });
         }
 
         private Task<FileSystemEventArgs> CompleteOnFirstChange()
         {
-            return Task.Factory.StartNew(() =>
+            return WithSubscribedQueue(queue =>
             {
                 FileSystemEventArgs args;
 
-                while (!eventQueue.TryTake(out args, 1000)) {};
+                while (!queue.TryTake(out args, 1000)) {};
 
                 return args;
             });
+        }
+
+        private Task WithSubscribedQueue(Action<BlockingCollection<FileSystemEventArgs>> fn)
+        {
+            return WithSubscribedQueue<object>(queue =>
+            {
+                fn(queue);
+                return null;
+            });
+        }
+
+        private Task<T> WithSubscribedQueue<T>(Func<BlockingCollection<FileSystemEventArgs>, T> fn)
+        {
+            var subscribedQueue = SubscribeQueue();
+
+            try
+            {
+                return Task.Factory.StartNew(() => fn(SubscribeQueue()));
+            } finally
+            {
+                UnsubscribeQueue(subscribedQueue);
+            }
+        }
+
+        private void UnsubscribeQueue(BlockingCollection<FileSystemEventArgs> subscribedQueue)
+        {
+            lock (subscriberQueues)
+            {
+                subscriberQueues.Remove(subscribedQueue);
+            }
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
@@ -142,10 +232,15 @@ namespace DotNetTestkit
                 );
             }
 
+            public FileWatcher Build()
+            {
+                return new FileWatcher(pattern, directories);
+            }
+
             private static void WithFileWatch(string pattern, List<string> directories, Func<FileWatcher, Task> fn)
             {
                 var watcher = new FileWatcher(pattern, directories);
-                
+
                 fn(watcher).ContinueWith(_ => watcher.Dispose());
             }
         }

@@ -21,15 +21,11 @@ namespace DotNetTestkit.EmbeddedServerRunner
 
         public virtual void Start()
         {
-            Console.WriteLine("Starting {0}", environments.Count);
-
             ForEachEnv((env) => env.Start());
         }
 
         public virtual void Stop()
         {
-            Console.WriteLine("Stopping {0}", environments.Count);
-
             ForEachEnv((env) => env.Stop());
         }
 
