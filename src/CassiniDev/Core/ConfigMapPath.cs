@@ -174,7 +174,7 @@ namespace CassiniDev
                 {
                     str2 = path.Substring(length);
                 }
-                str2 = str2.Replace('/', '\\');
+                str2 = str2.Replace('/', Path.DirectorySeparatorChar);
                 physicalDirectory = Path.Combine(mapping.PhysicalDirectory, str2);
             }
             if (this._pathsAreLocal && IsSuspiciousPhysicalPath(physicalDirectory))
@@ -232,11 +232,11 @@ namespace CassiniDev
             }
             if (flag)
             {
-                if ((physicalPath.IndexOf('/') >= 0) || (physicalPath.IndexOf(@"\..", StringComparison.Ordinal) >= 0))
+                if ((physicalPath.IndexOf('/') >= 0) || (physicalPath.IndexOf(Path.DirectorySeparatorChar + "..", StringComparison.Ordinal) >= 0))
                 {
                     return true;
                 }
-                for (int i = physicalPath.LastIndexOf('\\'); i >= 0; i = physicalPath.LastIndexOf('\\', i - 1))
+                for (int i = physicalPath.LastIndexOf(Path.DirectorySeparatorChar); i >= 0; i = physicalPath.LastIndexOf(Path.DirectorySeparatorChar, i - 1))
                 {
                     if (!IsSuspiciousPhysicalPath(physicalPath.Substring(0, i), out flag))
                     {

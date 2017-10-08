@@ -228,9 +228,12 @@ namespace CassiniDev
             _port = port;
             _virtualPath = virtualPath;
             _physicalPath = Path.GetFullPath(physicalPath);
-            _physicalPath = _physicalPath.EndsWith("\\", StringComparison.Ordinal)
+
+            var dirSeparator = Path.DirectorySeparatorChar.ToString();
+
+            _physicalPath = _physicalPath.EndsWith(dirSeparator, StringComparison.Ordinal)
                                 ? _physicalPath
-                                : _physicalPath + "\\";
+                                : _physicalPath + dirSeparator;
             ProcessConfiguration();
 
             string uniqueAppString = string.Concat(virtualPath, physicalPath, ":", _port.ToString()).ToLowerInvariant();
@@ -712,15 +715,21 @@ namespace CassiniDev
 
         private void ObtainProcessToken()
         {
-            if (Interop.ImpersonateSelf(2))
+            try
             {
-                Interop.OpenThreadToken(Interop.GetCurrentThread(), 0xf01ff, true, ref _processToken);
-                Interop.RevertToSelf();
-                // ReSharper disable PossibleNullReferenceException
-                _processUser = WindowsIdentity.GetCurrent().Name;
-                // ReSharper restore PossibleNullReferenceException
+                if (Interop.ImpersonateSelf(2))
+                {
+                    Interop.OpenThreadToken(Interop.GetCurrentThread(), 0xf01ff, true, ref _processToken);
+                    Interop.RevertToSelf();
+                    // ReSharper disable PossibleNullReferenceException
+                    // ReSharper restore PossibleNullReferenceException
+                }
+            } catch(Exception e) {
+                Console.WriteLine(e.ToString());
             }
-        }
+		
+            _processUser = WindowsIdentity.GetCurrent().Name;
+		}
 
         private void OnRequestComplete(Guid id, LogInfo requestLog, LogInfo responseLog)
         {

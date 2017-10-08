@@ -28,6 +28,7 @@ using System.IO;
 using System.Reflection;
 using System.Linq;
 using CassiniDev.Core;
+using System.Configuration.Internal;
 
 #endregion
 
@@ -67,16 +68,24 @@ namespace CassiniDev
 
         private AppHosts _appHosts;
 
+        private string siteId;
+
         private string _virtualPath;
         private KeepAliveTextWriter outputWriter;
 
-        public AppDomain AppDomain
+        private static int siteIdCounter = 1;
+		
+        private const string ConfigSystemTypeString = "System.Configuration.Internal.ConfigSystem, System.Configuration";
+
+		public AppDomain AppDomain
         {
             get { return AppDomain.CurrentDomain; }
         }
 
         public Host()
         {
+            siteId = (siteIdCounter++).ToString();
+
             HostingEnvironment.RegisterObject(this);
         }
 
@@ -183,7 +192,7 @@ namespace CassiniDev
             _lowerCasedVirtualPathWithTrailingSlash =
                 CultureInfo.InvariantCulture.TextInfo.ToLower(_lowerCasedVirtualPathWithTrailingSlash);
             _physicalPath = physicalPath;
-            _physicalClientScriptPath = HttpRuntime.AspClientScriptPhysicalPath + "\\";
+            _physicalClientScriptPath = HttpRuntime.AspClientScriptPhysicalPath + Path.DirectorySeparatorChar;
             _lowerCasedClientScriptPathWithTrailingSlash =
                 CultureInfo.InvariantCulture.TextInfo.ToLower(HttpRuntime.AspClientScriptVirtualPath + "/");
 
@@ -328,6 +337,7 @@ namespace CassiniDev
 
         public IConfigMapPathFactory GetConfigMapPathFactory()
         {
+            Console.WriteLine("ConfigMapFactory");
             //var type = typeof(HttpRuntime).Assembly.GetType("System.Web.Hosting.SimpleConfigMapPathFactory");
 
             //ConstructorInfo ctor = type.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)[0];
@@ -348,12 +358,12 @@ namespace CassiniDev
 
         public string GetSiteID()
         {
-            return "1";
+            return siteId; //Guid.NewGuid().ToString();
         }
 
         public string GetSiteName()
         {
-            return "Default Site";
+            return "Site " + siteId;
         }
 
         public string GetVirtualPath()
@@ -448,11 +458,11 @@ namespace CassiniDev
             return AppDomain.CurrentDomain.GetAssemblies().Select(x => x.GetName()).ToList();
         }
 
-        /*internal void LoadAssembly(AssemblyName assemblyName)
+		/*internal void LoadAssembly(AssemblyName assemblyName)
         {
             var path = new Uri(assemblyName.CodeBase).LocalPath;
             var asm = Assembly.LoadFrom(path);
             BuildManager.AddReferencedAssembly(asm);
         }*/
-    }
+	}
 }

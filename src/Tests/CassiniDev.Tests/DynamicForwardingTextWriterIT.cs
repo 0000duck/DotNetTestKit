@@ -33,7 +33,7 @@ namespace CassiniDev.Tests
 
             forwardingTextWriter.WriteLine("World!");
 
-            Assert.That(targetStreamA.ToString().Trim(), Is.EqualTo("Hello\r\nWorld!"));
+            Assert.That(targetStreamA.ToString().Trim(), Is.EqualTo("Hello" + Environment.NewLine + "World!"));
             Assert.That(targetStreamB.ToString().Trim(), Is.EqualTo("World!"));
         }
     }

@@ -19,7 +19,7 @@ namespace CassiniDev.Tests
 
             writer.WriteLine("Hello");
 
-            Assert.That(output.ToString(), Is.EqualTo("Hello\r\n"));
+            Assert.That(output.ToString(), Is.EqualTo("Hello" + Environment.NewLine));
         }
     }
 }

@@ -31,7 +31,7 @@ namespace CassiniDev.Tests
         {
             ServerRunner.RunWith(
                 EnvironmentOptionsTo(
-                    dllPath: "Tests\\ExampleApps\\SetUpEnvironmentApp\\bin\\SetUpEnvironmentApp.dll",
+                    dllPath: "Tests/ExampleApps/SetUpEnvironmentApp/bin/SetUpEnvironmentApp.dll",
                     typeName: "SetUpEnvironmentApp.ExampleEnvironment"),
                 output: output,
                 error: error);
@@ -44,7 +44,7 @@ namespace CassiniDev.Tests
         {
             ServerRunner.RunWith(
                 EnvironmentOptionsTo(
-                    dllPath: "Tests\\ExampleApps\\SetUpEnvironmentApp\\bin\\SetUpEnvironmentApp.dll",
+                    dllPath: "Tests/ExampleApps/SetUpEnvironmentApp/bin/SetUpEnvironmentApp.dll",
                     typeName: "SetUpEnvironmentApp.ServerEnvironment"));
             
             Assert.That(client.Get("http://localhost:9901/"), Is.Not.Empty);
@@ -53,7 +53,7 @@ namespace CassiniDev.Tests
         [Test]
         public void ReloadEnvironmentByChangingBinDir()
         {
-            var binSourcePath = "Tests\\ExampleApps\\SetUpEnvironmentApp\\bin\\";
+            var binSourcePath = "Tests/ExampleApps/SetUpEnvironmentApp/bin/";
 
             GivenDLLsAreDeployedFrom(binSourcePath, (binDirPath) =>
             {
@@ -88,7 +88,7 @@ namespace CassiniDev.Tests
         [Test]
         public void LoadEnvironmentByPostPopulatingTheDir()
         {
-            var binSourcePath = "Tests\\ExampleApps\\SetUpEnvironmentApp\\bin\\";
+            var binSourcePath = "Tests/ExampleApps/SetUpEnvironmentApp/bin/";
             var binDirPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             using (var env = ServerRunner.RunWith(
