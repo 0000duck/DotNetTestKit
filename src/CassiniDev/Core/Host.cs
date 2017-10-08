@@ -337,7 +337,6 @@ namespace CassiniDev
 
         public IConfigMapPathFactory GetConfigMapPathFactory()
         {
-            Console.WriteLine("ConfigMapFactory");
             //var type = typeof(HttpRuntime).Assembly.GetType("System.Web.Hosting.SimpleConfigMapPathFactory");
 
             //ConstructorInfo ctor = type.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)[0];
@@ -358,12 +357,12 @@ namespace CassiniDev
 
         public string GetSiteID()
         {
-            return siteId; //Guid.NewGuid().ToString();
+            return "1"; //Guid.NewGuid().ToString();
         }
 
         public string GetSiteName()
         {
-            return "Site " + siteId;
+            return "site-" + siteId;
         }
 
         public string GetVirtualPath()
