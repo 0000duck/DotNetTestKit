@@ -505,6 +505,8 @@ namespace CassiniDev
 
             var serverInfo = new ServerInfo(((IPEndPoint)_managementSocket.LocalEndPoint).Port);
 
+            Console.WriteLine("Server listening on management port {0}", serverInfo.Port);
+
             try
             {
                 setupAction(serverInfo);
@@ -537,6 +539,8 @@ namespace CassiniDev
             _socket = CreateSocketBindAndListen(AddressFamily.InterNetwork, _ipAddress, _port);
 
             ServeSocket(_socket);
+
+            Console.WriteLine("Server listening on port {0}", serverInfo.Port);
         }
 
         private void ServeSocket(Socket socket)

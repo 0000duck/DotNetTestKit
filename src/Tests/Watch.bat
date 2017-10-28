@@ -1,0 +1,1 @@
+c:\Code\NUnitWatch\NUnitWatch\bin\Debug\NUnitWatch.exe CassiniDev.Tests\bin\Release\CassiniDev4.Tests.dll

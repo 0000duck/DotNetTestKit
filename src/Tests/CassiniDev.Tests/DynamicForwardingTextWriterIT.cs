@@ -13,6 +13,7 @@ namespace CassiniDev.Tests
     {
         private DynamicForwardingTextWriter forwardingTextWriter;
 
+
         [SetUp]
         public void SetUp()
         {
