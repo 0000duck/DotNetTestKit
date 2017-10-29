@@ -101,6 +101,11 @@ namespace DotNetTestkit
 
                     foreach (var queue in subscriberQueues.ToArray())
                     {
+                        if (queue == null)
+                        {
+                            continue;
+                        }
+
                         queue.Add(args);
                     }
                 }
