@@ -90,7 +90,6 @@ namespace CassiniDev.Tests
 
                 Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
                     Does.Contain("Hello, I'm an appConfig value from RootApp"));
-            }
         }
 
         [Test]
@@ -121,16 +120,15 @@ namespace CassiniDev.Tests
         {
             var output = new StringWriter();
 
-           var server = EmbeddedServer.NewServer()
-                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests/ExampleApps/OutputtingApp"))
-                .WithOutputCollectionTo(output)
-                .Start())
-            {
-                Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
-                    Does.Contain("Hello, I'm OutputtingApp"));
+            var server = EmbeddedServer.NewServer()
+                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests/ExampleApps/OutputtingApp"))
+                 .WithOutputCollectionTo(output)
+                 .Start();
 
-                Assert.That(output.ToString().Trim(), Is.EqualTo("Hello!"));
-            }
+            Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
+                Does.Contain("Hello, I'm OutputtingApp"));
+
+            Assert.That(output.ToString().Trim(), Is.EqualTo("Hello!"));
         }
     }
 
