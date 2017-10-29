@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
+using System.Configuration;
+using System.Configuration.Internal;
 
 namespace CassiniDev
 {
@@ -119,8 +121,11 @@ namespace CassiniDev
 
             var output = new KeepAliveTextWriter(OutputWriter ?? Console.Out);
 
+            var applicationManager = ApplicationManager.GetApplicationManager();
+
             host = CreateWorkerAppDomainWithHost(host);
-            host.SetConsoleOut(output);
+
+			host.SetConsoleOut(output);
 
             if (HostCreated != null)
             {
@@ -231,10 +236,14 @@ namespace CassiniDev
         private Host CreateWorkerAppDomainWithHost(Host host)
         {
             // create BuildManagerHost in the worker app domain
-            //ApplicationManager appManager = ApplicationManager.GetApplicationManager();
             Type buildManagerHostType = typeof(HttpRuntime).Assembly.GetType("System.Web.Compilation.BuildManagerHost");
 
-            IRegisteredObject buildManagerHost = ApplicationManager.CreateObject(host, buildManagerHostType);
+            IRegisteredObject buildManagerHost = ApplicationManager.GetObject(host.GetSiteID(), buildManagerHostType);
+
+            if (buildManagerHost == null)
+            {
+                buildManagerHost = ApplicationManager.CreateObject(host, buildManagerHostType);
+            }
 
             // call BuildManagerHost.RegisterAssembly to make Host type loadable in the worker app domain
             buildManagerHostType.InvokeMember("RegisterAssembly",
@@ -246,11 +255,19 @@ namespace CassiniDev
             // create Host in the worker app domain
             // FIXME: getting FileLoadException Could not load file or assembly 'WebDev.WebServer20, Version=4.0.1.6, Culture=neutral, PublicKeyToken=f7f6e0b4240c7c27' or one of its dependencies. Failed to grant permission to execute. (Exception from HRESULT: 0x80131418)
             // when running dnoa 3.4 samples - webdev is registering trust somewhere that we are not
-            var remoteHost = (Host)ApplicationManager.CreateObject(host, host.GetType());
 
-            remoteHost.Configure(this, host.Port, host.VirtualPath, host.PhysicalPath, host.RequireAuthentication, host.DisableDirectoryListing);
+            Console.WriteLine("Creating Worker AppDomain {0}", host.GetSiteID());
 
-            return remoteHost;
+            Host remoteHost = (Host)ApplicationManager.GetObject(host.GetSiteID(), host.GetType());
+
+            if (remoteHost == null)
+            {
+                remoteHost = (Host)ApplicationManager.CreateObject(host, host.GetType());
+            }
+
+			remoteHost.Configure(this, host.Port, host.VirtualPath, host.PhysicalPath, host.RequireAuthentication, host.DisableDirectoryListing);
+
+			return remoteHost;
         }
 
         internal void AddMapping(string _virtualPath, string _physicalPath)

@@ -110,12 +110,16 @@ namespace DotNetTestkit
                 {
                     throw new DirectoryNotFoundException(dirPath);
                 }
-                
+
+                Console.WriteLine("Main Virtual Path: {0} -> {1}", mainAppVirtualPath, mainAppPhysicalPath);
+
                 var server = new Server(port, mainAppVirtualPath, mainAppPhysicalPath);
 
                 virtualDirectories.Skip(1).ToList().ForEach(additionalMapping =>
                 {
-                    server.RegisterAdditionalMapping(additionalMapping.VirtualPath, additionalMapping.PhysicalPath);
+					Console.WriteLine("Extra Virtual Path: {0} -> {1}", additionalMapping.VirtualPath, additionalMapping.PhysicalPath);
+
+					server.RegisterAdditionalMapping(additionalMapping.VirtualPath, additionalMapping.PhysicalPath);
                 });
 
                 server.OutputWriter = outputWriter;

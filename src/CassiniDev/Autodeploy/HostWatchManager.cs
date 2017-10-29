@@ -49,10 +49,10 @@ using Microsoft.Build.Evaluation;
 
             projectCollections.Add(slnFile, projCollection);
 
-            projCollection.SetGlobalProperty("SolutionDir", string.Format("{0}{1}", Path.GetDirectoryName(slnFile), Path.DirectorySeparatorChar));
-            projCollection.SetGlobalProperty("SolutionPath", slnFile);
-            projCollection.SetGlobalProperty("SolutionName", Path.GetFileNameWithoutExtension(slnFile));
-            projCollection.SetGlobalProperty("SolutionFileName", Path.GetFileName(slnFile));
+            projCollection.GlobalProperties.Add("SolutionDir", string.Format("{0}{1}", Path.GetDirectoryName(slnFile), Path.DirectorySeparatorChar));
+            projCollection.GlobalProperties.Add("SolutionPath", slnFile);
+            projCollection.GlobalProperties.Add("SolutionName", Path.GetFileNameWithoutExtension(slnFile));
+            projCollection.GlobalProperties.Add("SolutionFileName", Path.GetFileName(slnFile));
 
             foreach (var proj in projects.LoadedProjects)
             {

@@ -34,6 +34,10 @@ namespace DotNetTestkit
 
         public string ResolvePath(string relativePath)
         {
+            if (Path.DirectorySeparatorChar == '\\') {
+                relativePath = relativePath.Replace('/', '\\');
+            }
+
             return Path.Combine(solutionDir, relativePath);
         }
 

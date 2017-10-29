@@ -213,7 +213,7 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <PreBuildEvent>nuget.exe install "$(ProjectDir)packages.config" -o "$(SolutionDir)Packages"</PreBuildEvent>
-  </PropertyGroup>
+  </PropertyGroup>-->
 </Project>

@@ -61,6 +61,8 @@ namespace CassiniDev
 
             var target = vpLower;
 
+            Console.WriteLine("Registering config path {0} -> {1}", vpLower, physicalPath);
+
             fileMap.VirtualDirectories.Add(vpLower, new VirtualDirectoryMapping(physicalPath, true));
 
             while ((target = VirtualPathUtility.GetDirectory(target)) != null)

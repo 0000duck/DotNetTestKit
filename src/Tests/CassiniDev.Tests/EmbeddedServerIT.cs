@@ -21,8 +21,8 @@ namespace CassiniDev.Tests
 
             HostRemovedEventArgs removedArgs = null;
 
-            using (var server = EmbeddedServer.NewServer()
-                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\CassiniDev4.Tests.Web"))
+           using (var server = EmbeddedServer.NewServer(1)
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests/CassiniDev4.Tests.Web"))
                 .Start())
             {
                 HostCreatedEventArgs receivedArgs = null;
@@ -80,13 +80,13 @@ namespace CassiniDev.Tests
         [Test]
         public void LoadMultipleApps()
         {
-            using (var server = EmbeddedServer.NewServer()
-                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
-                .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\SubRootApp"))
-                .Start())
-            {            
-                Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
-                    Does.Contain("Hello, I'm RootApp"));
+            var server = EmbeddedServer.NewServer()
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests/ExampleApps/RootApp"))
+                .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests/ExampleApps/SubRootApp"))
+                .Start();
+
+            Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
+                Does.Contain("Hello, I'm RootApp"));
 
                 Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
                     Does.Contain("Hello, I'm an appConfig value from RootApp"));
@@ -96,26 +96,24 @@ namespace CassiniDev.Tests
         [Test]
         public void LoadStaticsForSubRootApp()
         {
-            using (var server = EmbeddedServer.NewServer()
-                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
-                .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\SubRootApp"))
-                .Start())
-            {
-                Assert.That(httpClient.Get(server.ResolveUrl("Sub/static/file.js")),
-                    Does.Contain("function"));
-            }
+           var server = EmbeddedServer.NewServer()
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests/ExampleApps/RootApp"))
+                .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests/ExampleApps/SubRootApp"))
+                .Start();
+
+            Assert.That(httpClient.Get(server.ResolveUrl("Sub/static/file.js")),
+                Does.Contain("function"));
         }
 
         [Test]
         public void LoadRootAppAtPath()
         {
-            using (var server = EmbeddedServer.NewServer()
-                .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"))
-                .Start())
-            {
-                Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
-                    Does.Contain("Hello, I'm RootApp"));
-            }
+            var server = EmbeddedServer.NewServer()
+                .WithVirtualDirectory("/Sub", solutionFiles.ResolvePath("Tests/ExampleApps/RootApp"))
+                .Start();
+
+            Assert.That(httpClient.Get(server.ResolveUrl("Sub/Default.aspx")),
+                Does.Contain("Hello, I'm RootApp"));
         }
 
         [Test]
@@ -123,8 +121,8 @@ namespace CassiniDev.Tests
         {
             var output = new StringWriter();
 
-            using (var server = EmbeddedServer.NewServer()
-                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\OutputtingApp"))
+           var server = EmbeddedServer.NewServer()
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests/ExampleApps/OutputtingApp"))
                 .WithOutputCollectionTo(output)
                 .Start())
             {
