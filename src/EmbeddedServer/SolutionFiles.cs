@@ -18,8 +18,14 @@ namespace DotNetTestkit
         public static SolutionFiles FromPathFile(string filepath)
         {
             var fullFilepath = GetDirectory(filepath).FullName;
+            var path = File.ReadAllText(fullFilepath).Trim();
 
-            return new SolutionFiles(File.ReadAllText(fullFilepath).Trim());
+            if (!File.Exists(path) || !Directory.Exists(path))
+            {
+                throw new Exception(string.Format("Path does not exist: {0}", path));
+            }
+
+            return new SolutionFiles(path);
         }
 
         public static SolutionFiles FromSolutionRoot()

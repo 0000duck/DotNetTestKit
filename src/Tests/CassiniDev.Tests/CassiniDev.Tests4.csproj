@@ -141,9 +141,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CassiniDev\CassiniDev.Lib.csproj">
-      <Project>{4ef6fe65-0bde-4ac4-b9cf-f2d8ffe886c1}</Project>
-      <Name>CassiniDev.Lib</Name>
+    <ProjectReference Include="..\..\CassiniDev\CassiniDev.Lib4.csproj">
+      <Project>{070ae36d-4ce1-4708-bd0f-2896a6f117fc}</Project>
+      <Name>CassiniDev.Lib4</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\EmbeddedServer.Runner\EmbeddedServer.Runner.csproj">
       <Project>{7195f23a-b653-4acc-9447-bcd9a6444a45}</Project>

@@ -12,7 +12,7 @@ namespace CassiniDev.Tests
     public class EmbeddedServerIT
     {
         SimpleHttpClient httpClient = new SimpleHttpClient();
-        SolutionFiles solutionFiles = SolutionFiles.FromPathFile("solution-dir.txt");
+        SolutionFiles solutionFiles = SolutionFiles.FromSolutionRoot();
 
         [Test]
         public void StartAndStop()
@@ -119,9 +119,10 @@ namespace CassiniDev.Tests
         public void CollectConsoleOutputFromTheApp()
         {
             var output = new StringWriter();
+            var serverPath = solutionFiles.ResolvePath("Tests/ExampleApps/OutputtingApp");
 
             var server = EmbeddedServer.NewServer()
-                 .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests/ExampleApps/OutputtingApp"))
+                 .WithVirtualDirectory("/", serverPath)
                  .WithOutputCollectionTo(output)
                  .Start();
 

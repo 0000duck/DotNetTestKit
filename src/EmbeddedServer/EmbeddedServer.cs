@@ -104,7 +104,18 @@ namespace DotNetTestkit
                 var mainAppVirtualPath = virtualDirectories.First().VirtualPath;
                 var mainAppPhysicalPath = virtualDirectories.First().PhysicalPath;
 
-                var dirPath = Path.GetFullPath(mainAppPhysicalPath);
+                Console.WriteLine("Starting server at {0}", mainAppPhysicalPath);
+
+                string dirPath;
+
+                try
+                {
+                    dirPath = Path.GetFullPath(mainAppPhysicalPath);
+                } catch (Exception e)
+                {
+                    Console.WriteLine("Failed to starting server at {0}", mainAppPhysicalPath);
+                    throw;
+                }
 
                 if (!Directory.Exists(dirPath))
                 {
