@@ -140,6 +140,7 @@
     <Compile Include="Configuration\CassiniDevConfigurationSection.cs" />
     <Compile Include="Configuration\CassiniDevProfileElement.cs" />
     <Compile Include="Configuration\CassiniDevProfileElementCollection.cs" />
+    <Compile Include="Configuration\ConfigRewriter.cs" />
     <Compile Include="Configuration\PluginElement.cs" />
     <Compile Include="Configuration\PluginElementCollection.cs" />
     <Compile Include="ContentLocator.cs" />
