@@ -20,9 +20,7 @@ namespace CassiniDev.Configuration
 
         public string Rewrite(string source, ConfigReplacements replacements)
         {
-
             var doc = ReadDocument(source);
-
             var root = doc.DocumentElement;
 
             foreach (var path in replacements.Paths)
@@ -32,50 +30,10 @@ namespace CassiniDev.Configuration
 
                 if (configSource != null)
                 {
-                    var inclusionSource = sources.ResolveSource(configSource.Value);
-                    var xmlDoc = ReadDocument(inclusionSource);
-
-                    var importedContainer = doc.ImportNode(xmlDoc.DocumentElement, true);
-
-                    container.ParentNode.ReplaceChild(importedContainer, container);
-
-                    container = importedContainer;
+                    container = ImportConfigSource(doc, container, configSource);
                 }
 
-                var nodes = container.SelectNodes("add");
-                var nameValues = path.ConfigReplacement.NameValues;
-                var keyName = path.ConfigReplacement.KeyName;
-                var unusedValues = new HashSet<string>(nameValues.Keys);
-
-                foreach (var node in nodes)
-                {
-                    if (!(node is XmlElement))
-                    {
-                        continue;
-                    }
-
-                    var element = (XmlElement)node;
-                    var key = element.Attributes[keyName];
-
-                    if (key == null)
-                    {
-                        throw new Exception(string.Format("Key \"{0}\" not found for {1}", keyName, path.Path));
-                    }
-
-                    object valueForRewrite;
-
-                    if (nameValues.TryGetValue(key.Value, out valueForRewrite))
-                    {
-                        RewriteElement(element, valueForRewrite);
-
-                        unusedValues.Remove(key.Value);
-                    }
-                }
-
-                if (unusedValues.Count > 0)
-                {
-                    throw new Exception(string.Format("Value was not used: {0}", unusedValues.First()));
-                }
+                RewriteElements(container.SelectNodes("add"), path);
             }
 
             var writer = new StringWriter();
@@ -83,6 +41,55 @@ namespace CassiniDev.Configuration
             doc.Save(writer);
 
             return writer.ToString();
+        }
+
+        private void RewriteElements(XmlNodeList nodes, ConfigElementPath path)
+        {
+            var nameValues = path.ConfigReplacement.NameValues;
+            var keyName = path.ConfigReplacement.KeyName;
+            var unusedValues = new HashSet<string>(nameValues.Keys);
+
+            foreach (var node in nodes)
+            {
+                if (!(node is XmlElement))
+                {
+                    continue;
+                }
+
+                var element = (XmlElement)node;
+                var key = element.Attributes[keyName];
+
+                if (key == null)
+                {
+                    throw new Exception(string.Format("Key \"{0}\" not found for {1}", keyName, path.Path));
+                }
+
+                object valueForRewrite;
+
+                if (nameValues.TryGetValue(key.Value, out valueForRewrite))
+                {
+                    RewriteElement(element, valueForRewrite);
+
+                    unusedValues.Remove(key.Value);
+                }
+            }
+
+            if (unusedValues.Count > 0)
+            {
+                throw new Exception(string.Format("Value was not used: {0}", unusedValues.First()));
+            }
+        }
+
+        private XmlNode ImportConfigSource(XmlDocument doc, XmlNode container, XmlAttribute configSource)
+        {
+            var inclusionSource = sources.ResolveSource(configSource.Value);
+            var xmlDoc = ReadDocument(inclusionSource);
+
+            var importedContainer = doc.ImportNode(xmlDoc.DocumentElement, true);
+
+            container.ParentNode.ReplaceChild(importedContainer, container);
+
+            return importedContainer;
         }
 
         private XmlDocument ReadDocument(string source)
