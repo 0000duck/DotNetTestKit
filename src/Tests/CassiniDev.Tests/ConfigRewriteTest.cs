@@ -29,18 +29,51 @@ namespace CassiniDev.Tests
         }
 
         [Test]
+        public void RewriteAComplexElement()
+        {
+            var rewrittenConfig = ForConfigAndReplacements(@"
+                <configuration>
+                    <connectionStrings>
+                        <add name=""Test"" connectionString=""ConnectionString"" providerName=""ProviderName"" />
+                    </connectionStrings>
+                </configuration>",
+                (builder) => builder.ForPath("connectionStrings", (replacementBuilder) =>
+                    replacementBuilder.WithKeyName("name").ForKey("Test", value: new
+                    {
+                        connectionString = "ConnectionString-M",
+                        providerName = "ProviderName-M"
+                    })));
+
+            Assert.That(rewrittenConfig, Does.Contain(@"connectionString=""ConnectionString-M"""));
+        }
+
+        [Test]
         public void SkipRewritingAValueIfNotConfigured()
         {
             var rewrittenConfig = ForConfigAndReplacements(@"
                 <configuration>
                     <appSettings>
                         <add key=""Test"" value=""true"" />
+                        <add key=""A"" value=""true"" />
                     </appSettings>
                 </configuration>",
                 (builder) => builder.ForPath("appSettings", (replacementBuilder) =>
                     replacementBuilder.ForKey("A", value: "false")));
 
-            Assert.That(rewrittenConfig, Does.Contain(@"value=""true"""));
+            Assert.That(rewrittenConfig, Does.Contain(@"<add key=""Test"" value=""true"" />"));
+        }
+
+        [Test]
+        public void FailIfValueProvidedDoesNotExist()
+        {
+            Assert.Throws<Exception>(() => ForConfigAndReplacements(@"
+                <configuration>
+                    <appSettings>
+                        <add key=""Test"" value=""true"" />
+                    </appSettings>
+                </configuration>",
+                (builder) => builder.ForPath("appSettings", (replacementBuilder) =>
+                    replacementBuilder.ForKey("A", value: "false"))));
         }
 
         private string ForConfigAndReplacements(string configSource, Func<ConfigReplacementsBuilder, ConfigReplacementsBuilder> withBuilder)
@@ -61,6 +94,8 @@ namespace CassiniDev.Tests
                 var container = root.SelectSingleNode(string.Format("/configuration/{0}", path.Path));
                 var nodes = container.SelectNodes("add");
                 var nameValues = path.ConfigReplacement.NameValues;
+                var keyName = path.ConfigReplacement.KeyName;
+                var unusedValues = new HashSet<string>(nameValues.Keys);
 
                 foreach (var node in nodes)
                 {
@@ -70,14 +105,26 @@ namespace CassiniDev.Tests
                     }
 
                     var element = (XmlElement)node;
-                    var key = element.Attributes["key"];
+                    var key = element.Attributes[keyName];
 
-                    var valueForRewrite = nameValues.Get(key.Value);
-
-                    if (valueForRewrite != null)
+                    if (key == null)
                     {
-                        element.SetAttribute("value", valueForRewrite);
+                        throw new Exception(string.Format("Key \"{0}\" not found for {1}", keyName, path.Path));
                     }
+
+                    object valueForRewrite;
+
+                    if (nameValues.TryGetValue(key.Value, out valueForRewrite))
+                    {
+                        RewriteElement(element, valueForRewrite);
+
+                        unusedValues.Remove(key.Value);
+                    }
+                }
+
+                if (unusedValues.Count > 0)
+                {
+                    throw new Exception(string.Format("Value was not used {0}", unusedValues.First()));
                 }
             }
 
@@ -86,6 +133,30 @@ namespace CassiniDev.Tests
             doc.Save(writer);
 
             return writer.ToString();
+        }
+
+        private void RewriteElement(XmlElement element, object valueForRewrite)
+        {
+            if (valueForRewrite is string)
+            {
+                element.SetAttribute("value", valueForRewrite.ToString());
+            } else if (valueForRewrite is object)
+            {
+                RewriteElementWithComplextObject(element, valueForRewrite);
+            }
+        }
+
+        private void RewriteElementWithComplextObject(XmlElement element, object valueForRewrite)
+        {
+            var valueType = valueForRewrite.GetType();
+
+            foreach (var property in valueType.GetProperties())
+            {
+                var fieldName = property.Name;
+                var attribute = element.Attributes[fieldName];
+
+                attribute.Value = (string)property.GetValue(valueForRewrite);
+            }
         }
 
         public string TraverseConfigSection(string xmlConfig, string section)
@@ -125,29 +196,41 @@ namespace CassiniDev.Tests
 
     public class ConfigReplacementBuilder
     {
-        private readonly NameValueCollection nameValues;
+        private readonly string keyName;
+        private readonly Dictionary<string, object> nameValues;
 
-        public ConfigReplacementBuilder(): this(new NameValueCollection())
+        public ConfigReplacementBuilder(): this(new Dictionary<string, object>())
         {
         }
 
-        public ConfigReplacementBuilder(NameValueCollection nameValue)
+        public ConfigReplacementBuilder(Dictionary<string, object> nameValues, string keyName = "key")
         {
-            this.nameValues = nameValue;
+            this.keyName = keyName;
+            this.nameValues = nameValues;
         }
 
         public ConfigReplacement Build()
         {
-            return new ConfigReplacement(nameValues);
+            return new ConfigReplacement(keyName, nameValues);
         }
 
         public ConfigReplacementBuilder ForKey(string key, string value)
         {
-            var values = new NameValueCollection(nameValues);
+            return ForKey(key, (object)value);
+        }
+
+        public ConfigReplacementBuilder ForKey(string key, object value)
+        {
+            var values = new Dictionary<string, object>(nameValues);
 
             values.Add(key, value);
 
-            return new ConfigReplacementBuilder(values);
+            return new ConfigReplacementBuilder(values, keyName: keyName);
+        }
+
+        public ConfigReplacementBuilder WithKeyName(string name)
+        {
+            return new ConfigReplacementBuilder(nameValues, keyName: name);
         }
     }
 
@@ -199,14 +282,24 @@ namespace CassiniDev.Tests
 
     public class ConfigReplacement
     {
-        private NameValueCollection nameValues;
+        private readonly string keyName;
+        private Dictionary<string, object> nameValues;
 
-        public ConfigReplacement(NameValueCollection nameValues)
+        public ConfigReplacement(string keyName, Dictionary<string, object> nameValues)
         {
+            this.keyName = keyName;
             this.nameValues = nameValues;
         }
 
-        public NameValueCollection NameValues
+        public string KeyName
+        {
+            get
+            {
+                return keyName;
+            }
+        }
+
+        public Dictionary<string, object> NameValues
         {
             get
             {
