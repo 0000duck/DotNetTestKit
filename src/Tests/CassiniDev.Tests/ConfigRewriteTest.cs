@@ -64,6 +64,28 @@ namespace CassiniDev.Tests
         }
 
         [Test]
+        public void CombineRewrittenConfig()
+        {
+            var givenAppSettings =
+                @"<appSettings>
+                    <add key=""Test"" value=""true"" />
+                </appSettings>";
+
+            var rewrittenConfig = ForConfigAndReplacements(@"
+                <configuration>
+                    <appSettings configSource=""a/b/c/appSettings.config"" />
+                </configuration>",
+                (builder) => builder.ForPath("appSettings", (replacementBuilder) =>
+                    replacementBuilder.ForKey("Test", value: "false")),
+                new Dictionary<string, string>()
+                {
+                    { "a/b/c/appSettings.config", givenAppSettings }
+                });
+
+            Assert.That(rewrittenConfig, Does.Contain(@"<add key=""Test"" value=""false"" />"));
+        }
+
+        [Test]
         public void FailIfValueProvidedDoesNotExist()
         {
             Assert.Throws<Exception>(() => ForConfigAndReplacements(@"
@@ -76,22 +98,39 @@ namespace CassiniDev.Tests
                     replacementBuilder.ForKey("A", value: "false"))));
         }
 
-        private string ForConfigAndReplacements(string configSource, Func<ConfigReplacementsBuilder, ConfigReplacementsBuilder> withBuilder)
+        private string ForConfigAndReplacements(string configSource, Func<ConfigReplacementsBuilder, ConfigReplacementsBuilder> withBuilder, Dictionary<string, string> extraFiles = null)
         {
-            return OverwriteConfig(configSource, withBuilder(new ConfigReplacementsBuilder()).Build());
+            if (extraFiles == null)
+            {
+                extraFiles = new Dictionary<string, string>();
+            }        
+
+            return OverwriteConfig(new ConfigSources(extraFiles), configSource, withBuilder(new ConfigReplacementsBuilder()).Build());
         }
 
-        public string OverwriteConfig(string xmlConfig, ConfigReplacements replacements)
+        public string OverwriteConfig(ConfigSources sources, string xmlConfig, ConfigReplacements replacements)
         {
-            var doc = new XmlDocument();
-
-            doc.LoadXml(xmlConfig);
+            var doc = ReadDocument(xmlConfig);
 
             var root = doc.DocumentElement;
 
             foreach (var path in replacements.Paths)
             {
                 var container = root.SelectSingleNode(string.Format("/configuration/{0}", path.Path));
+                var configSource = container.Attributes["configSource"];
+
+                if (configSource != null)
+                {
+                    var inclusionSource = sources.ResolveSource(configSource.Value);
+                    var xmlDoc = ReadDocument(inclusionSource);
+
+                    var importedContainer = doc.ImportNode(xmlDoc.DocumentElement, true);
+
+                    container.ParentNode.ReplaceChild(importedContainer, container);
+
+                    container = importedContainer;
+                }
+
                 var nodes = container.SelectNodes("add");
                 var nameValues = path.ConfigReplacement.NameValues;
                 var keyName = path.ConfigReplacement.KeyName;
@@ -124,7 +163,7 @@ namespace CassiniDev.Tests
 
                 if (unusedValues.Count > 0)
                 {
-                    throw new Exception(string.Format("Value was not used {0}", unusedValues.First()));
+                    throw new Exception(string.Format("Value was not used: {0}", unusedValues.First()));
                 }
             }
 
@@ -133,6 +172,15 @@ namespace CassiniDev.Tests
             doc.Save(writer);
 
             return writer.ToString();
+        }
+
+        private XmlDocument ReadDocument(string source)
+        {
+            var doc = new XmlDocument();
+
+            doc.LoadXml(source);
+
+            return doc;
         }
 
         private void RewriteElement(XmlElement element, object valueForRewrite)
@@ -162,6 +210,21 @@ namespace CassiniDev.Tests
         public string TraverseConfigSection(string xmlConfig, string section)
         {
             return xmlConfig;
+        }
+    }
+
+    public class ConfigSources
+    {
+        private readonly Dictionary<string, string> sources;
+
+        public ConfigSources(Dictionary<string, string> sources)
+        {
+            this.sources = sources;
+        }
+
+        public string ResolveSource(string path)
+        {
+            return sources[path];
         }
     }
 
