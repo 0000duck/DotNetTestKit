@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CassiniDev.Tests4", "Tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CassiniDev4.Tests.Web", "Tests\CassiniDev4.Tests.Web\CassiniDev4.Tests.Web.csproj", "{D4BEEAC1-493C-4B21-ADDB-0B29CDBD8266}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigurableApp", "Tests\ExampleApps\ConfigurableApp\ConfigurableApp.csproj", "{D6FD6843-6496-4D83-815F-51686F7175CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -212,6 +214,22 @@ Global
 		{D4BEEAC1-493C-4B21-ADDB-0B29CDBD8266}.Release|x64.Build.0 = Release|Any CPU
 		{D4BEEAC1-493C-4B21-ADDB-0B29CDBD8266}.Release|x86.ActiveCfg = Release|x86
 		{D4BEEAC1-493C-4B21-ADDB-0B29CDBD8266}.Release|x86.Build.0 = Release|x86
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Debug|x64.Build.0 = Debug|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Debug|x86.Build.0 = Debug|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Release|x64.ActiveCfg = Release|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Release|x64.Build.0 = Release|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Release|x86.ActiveCfg = Release|Any CPU
+		{D6FD6843-6496-4D83-815F-51686F7175CF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -224,6 +242,7 @@ Global
 		{58E1DA3F-5941-4DFA-A2A7-2C49109790C2} = {0850CD5A-BC0C-427E-9E52-8C63387AC57B}
 		{1A81ACBC-6BBF-4F49-9E7C-8AF029DAB2AA} = {9FBA886A-1E2A-47C3-B3BE-4DEDF83CE830}
 		{D4BEEAC1-493C-4B21-ADDB-0B29CDBD8266} = {9FBA886A-1E2A-47C3-B3BE-4DEDF83CE830}
+		{D6FD6843-6496-4D83-815F-51686F7175CF} = {0850CD5A-BC0C-427E-9E52-8C63387AC57B}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = CassiniDev.4.vsmdi

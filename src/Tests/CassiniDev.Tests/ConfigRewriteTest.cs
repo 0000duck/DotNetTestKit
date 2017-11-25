@@ -27,6 +27,23 @@ namespace CassiniDev.Tests
         }
 
         [Test]
+        public void RewriteSimpleAppConfigWithProvidedValues()
+        {
+            var rewrittenConfig = ForConfigAndReplacements(@"
+                <configuration>
+                    <appSettings>
+                        <add key=""Test"" value=""true"" />
+                    </appSettings>
+                </configuration>",
+                (builder) => builder.ForPathWithValues("appSettings", new
+                {
+                    Test = "false"
+                }));
+
+            Assert.That(rewrittenConfig, Does.Contain(@"value=""false"""));
+        }
+
+        [Test]
         public void RewriteAComplexElement()
         {
             var rewrittenConfig = ForConfigAndReplacements(@"

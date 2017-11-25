@@ -95,7 +95,6 @@ namespace DotNetTestkit
             public Builder WithOutputCollectionTo(TextWriter output)
             {
                 outputWriter = output;
-
                 return this;
             }
 

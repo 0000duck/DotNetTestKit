@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RootApp {
+namespace ConfigurableApp {
     
     
     public partial class SiteMaster {

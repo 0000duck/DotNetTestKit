@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web;
 
-namespace RootApp
+namespace ConfigurableApp
 {
     public class Global : HttpApplication
     {

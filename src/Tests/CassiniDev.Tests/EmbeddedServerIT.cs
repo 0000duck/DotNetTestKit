@@ -5,6 +5,7 @@ using System.IO;
 using DotNetTestkit;
 using System.Linq;
 using CassiniDev.Core;
+using CassiniDev.Configuration;
 
 namespace CassiniDev.Tests
 {
@@ -131,6 +132,30 @@ namespace CassiniDev.Tests
 
             Assert.That(output.ToString().Trim(), Is.EqualTo("Hello!"));
         }
+
+        //[Test]
+        //public void LoadAppWithConfigurationOverwrite()
+        //{
+        //    var serverPath = solutionFiles.ResolvePath("Tests/ExampleApps/ConfigurableApp");
+        //    var givenConfigRewrite = new ConfigReplacementsBuilder()
+        //        .ForPathWithValues("appSettings", new
+        //        {
+        //            applicationName = "ConfiguredApp!"
+        //        })
+        //        .Build();
+
+        //    var server = EmbeddedServer.NewServer()
+        //         .WithVirtualDirectory("/", serverPath, RewriteWebConfigWith(givenConfigRewrite))
+        //         .Start();
+
+        //    Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
+        //        Does.Contain("Hello, I'm ConfiguredApp!"));
+        //}
+
+        //private Func<WebAppConfigBuilder, WebAppConfigBuilder> RewriteWebConfigWith(ConfigReplacements replacements)
+        //{
+        //    return (builder) => builder;
+        //}
     }
 
     class SimpleHttpClient
