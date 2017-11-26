@@ -15,15 +15,17 @@ namespace DotNetTestkit
         private Server server;
         private static Random random = new Random(DateTime.Now.Millisecond);
         private readonly Uri baseUrl;
+        private readonly List<IDisposable> resources;
 
         public event EventHandler<HostCreatedEventArgs> HostCreated;
         public event EventHandler<HostRemovedEventArgs> HostRemoved;
         public event EventHandler<HostRemovedEventArgs> HostRemovedWithStableBinDir;
 
-        private EmbeddedServer(Server server)
+        private EmbeddedServer(Server server, List<IDisposable> resources)
         {
             this.server = server;
             this.baseUrl = new Uri(server.RootUrl);
+            this.resources = resources;
 
             server.HostCreated += (s, e) =>
             {
@@ -87,7 +89,14 @@ namespace DotNetTestkit
 
             public Builder WithVirtualDirectory(string virtualPath, string directoryPath)
             {
-                virtualDirectories.Add(new DirectoryMapping(virtualPath, directoryPath));
+                virtualDirectories.Add(new DirectoryMapping(virtualPath, new SimpleServerApp(directoryPath)));
+
+                return this;
+            }
+
+            public Builder WithVirtualDirectory(string virtualPath, IServerApp serverApp)
+            {
+                virtualDirectories.Add(new DirectoryMapping(virtualPath, serverApp));
 
                 return this;
             }
@@ -100,8 +109,15 @@ namespace DotNetTestkit
 
             public EmbeddedServer Start()
             {
-                var mainAppVirtualPath = virtualDirectories.First().VirtualPath;
-                var mainAppPhysicalPath = virtualDirectories.First().PhysicalPath;
+                var virtualDirectory = virtualDirectories.First();
+
+                var mainAppVirtualPath = virtualDirectory.VirtualPath;
+                var mainApp = virtualDirectory.ServerApp.Start(new ServerAppConfiguration(virtualDirectory.VirtualPath));
+                var mainAppPhysicalPath = mainApp.PhysicalPath;
+
+                var resources = new List<IDisposable>(virtualDirectories.Count);
+
+                resources.Add(mainApp);
 
                 Console.WriteLine("Starting server at {0}", mainAppPhysicalPath);
 
@@ -127,9 +143,13 @@ namespace DotNetTestkit
 
                 virtualDirectories.Skip(1).ToList().ForEach(additionalMapping =>
                 {
-					Console.WriteLine("Extra Virtual Path: {0} -> {1}", additionalMapping.VirtualPath, additionalMapping.PhysicalPath);
+                    var additionalApp = additionalMapping.ServerApp.Start(new ServerAppConfiguration(additionalMapping.VirtualPath));
 
-					server.RegisterAdditionalMapping(additionalMapping.VirtualPath, additionalMapping.PhysicalPath);
+                    resources.Add(additionalApp);
+
+					Console.WriteLine("Extra Virtual Path: {0} -> {1}", additionalMapping.VirtualPath, additionalApp.PhysicalPath);
+
+					server.RegisterAdditionalMapping(additionalMapping.VirtualPath, additionalApp.PhysicalPath);
                 });
 
                 server.OutputWriter = outputWriter;
@@ -144,12 +164,14 @@ namespace DotNetTestkit
                     }
                 });
 
+                var embeddedServer = new EmbeddedServer(server, resources);
+
                 AppDomain.CurrentDomain.DomainUnload += (e, a) =>
                 {
-                    server.Dispose();
+                    embeddedServer.Dispose();
                 };
 
-                return new EmbeddedServer(server);
+                return embeddedServer;
             }
         }
 
@@ -160,6 +182,17 @@ namespace DotNetTestkit
 
         public void Dispose()
         {
+            this.resources.ForEach(resource => {
+                try
+                {
+                    resource.Dispose();
+                } catch (Exception e)
+                {
+                    Console.Error.WriteLine("Error disposing resource {0}", resource.GetType().Name);
+                    Console.Error.WriteLine(e);
+                }
+            });
+
             server.Dispose();
         }
 
@@ -197,13 +230,13 @@ namespace DotNetTestkit
     {
         private static string DirSeparator = Path.DirectorySeparatorChar.ToString();
 
-        public DirectoryMapping(string virtualPath, string physicalPath)
+        public DirectoryMapping(string virtualPath, IServerApp serverApp)
         {
-            this.VirtualPath = virtualPath;
-            this.PhysicalPath = physicalPath.EndsWith(DirSeparator) ? physicalPath : physicalPath + DirSeparator;
+            VirtualPath = virtualPath;
+            ServerApp = serverApp;
         }
 
-        public string PhysicalPath { get; private set; }
         public string VirtualPath { get; private set; }
+        public IServerApp ServerApp { get; private set; }
     }
 }

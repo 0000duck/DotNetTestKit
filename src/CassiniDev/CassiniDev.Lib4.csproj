@@ -152,6 +152,7 @@
     <Compile Include="Core\HostCreatedEventArgs.cs" />
     <Compile Include="Core\HostRemovedEventArgs.cs" />
     <Compile Include="Core\HttpConnectionWrapper.cs" />
+    <Compile Include="Core\IServerApp.cs" />
     <Compile Include="Core\KeepAliveTextWriter.cs" />
     <Compile Include="Core\Messages.cs" />
     <Compile Include="Core\NtlmAuth.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="Core\RequestEventArgs.cs" />
     <Compile Include="Core\Server.cs" />
     <Compile Include="Core\ServerInfo.cs" />
+    <Compile Include="Deployment\DeployedApp.cs" />
     <Compile Include="IContentLocator.cs" />
     <Compile Include="LocalContentLocator.cs" />
     <Compile Include="Logging\LogInfo.cs" />

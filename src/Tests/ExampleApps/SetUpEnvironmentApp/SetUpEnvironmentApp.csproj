@@ -45,6 +45,10 @@
     <Compile Include="ServerEnvironment.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\CassiniDev\CassiniDev.Lib4.csproj">
+      <Project>{070ae36d-4ce1-4708-bd0f-2896a6f117fc}</Project>
+      <Name>CassiniDev.Lib4</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\EmbeddedServer\EmbeddedServer.csproj">
       <Project>{187b166b-ef4f-4d34-beb9-c6a4ed71479e}</Project>
       <Name>EmbeddedServer</Name>

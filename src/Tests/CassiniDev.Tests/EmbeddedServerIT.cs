@@ -11,6 +11,7 @@ using System.Security.AccessControl;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
+using CassiniDev.Deployment;
 
 namespace CassiniDev.Tests
 {
@@ -150,7 +151,7 @@ namespace CassiniDev.Tests
                 .Build();
 
             var server = EmbeddedServer.NewServer()
-                 .WithVirtualDirectory("/", WithRewrittenWebConfig(serverPath, givenConfigRewrite))
+                 .WithVirtualDirectory("/", new DeployedApp(serverPath, givenConfigRewrite))
                  .Start();
 
             Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
@@ -162,8 +163,6 @@ namespace CassiniDev.Tests
             var tempFiles = new AutoRemovableDirectory();
             var root = new DirectoryInfo(projectPath);
             var rootUri = new Uri(Commons.EnsureTrailingSlash(projectPath));
-
-            Console.WriteLine("Dir {0}", tempFiles.BasePath);
 
             CopyFilesFromDir(tempFiles, rootUri, root);
 

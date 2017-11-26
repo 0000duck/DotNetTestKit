@@ -865,6 +865,10 @@ namespace CassiniDev
 
         public void RegisterAdditionalMapping(string virtualDirectory, string physicalDirectory)
         {
+            var dirSeparator = Path.DirectorySeparatorChar.ToString();
+
+            physicalDirectory = physicalDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()) ? physicalDirectory : physicalDirectory + dirSeparator;
+
             _appHosts.AddMapping(virtualDirectory, physicalDirectory);
         }
 
