@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using CassiniDev.Misc;
 
 namespace CassiniDev.Configuration
 {
@@ -125,11 +126,11 @@ namespace CassiniDev.Configuration
 
         private void RewriteElementWithComplextObject(XmlElement element, object valueForRewrite)
         {
-            foreach (var pair in Commons.ValuesToDictionary(valueForRewrite))
+            foreach (var pair in valueForRewrite.ToDictionary())
             {
                 var attribute = element.Attributes[pair.Key];
 
-                attribute.Value = pair.Value;
+                attribute.Value = (string)pair.Value;
             }
         }
     }
@@ -165,7 +166,7 @@ namespace CassiniDev.Configuration
         public ConfigReplacementsBuilder ForPathWithValues(string path, object values)
         {
 
-            return ForPath(path, (builder) => WithValuesForKeys(builder, Commons.ValuesToDictionary(values)));
+            return ForPath(path, (builder) => WithValuesForKeys(builder, values.ToDictionary<string>()));
         }
 
         public ConfigReplacementsBuilder ForPath(string path, Func<ConfigReplacementBuilder, ConfigReplacementBuilder> withReplacementBuilder)
@@ -310,22 +311,6 @@ namespace CassiniDev.Configuration
             {
                 nameValues = value;
             }
-        }
-    }
-
-    internal static class Commons
-    {
-        public static Dictionary<string, string> ValuesToDictionary(object valueForRewrite)
-        {
-            var valueType = valueForRewrite.GetType();
-            var values = new Dictionary<string, string>();
-
-            foreach (var property in valueType.GetProperties())
-            {
-                values.Add(property.Name, (string)property.GetValue(valueForRewrite, new object[0]));
-            }
-
-            return values;
         }
     }
 }

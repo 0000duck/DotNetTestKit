@@ -176,6 +176,7 @@
     <Compile Include="Misc\HostsFile.cs" />
     <Compile Include="Misc\Interop.cs" />
     <Compile Include="Misc\NetworkUtils.cs" />
+    <Compile Include="Misc\ObjectValues.cs" />
     <Compile Include="Properties\AssemblyInfo4.cs" />
     <Compile Include="QUnitExBrowserTestResultItem.cs" />
     <Compile Include="Resources\SR.cs" />
