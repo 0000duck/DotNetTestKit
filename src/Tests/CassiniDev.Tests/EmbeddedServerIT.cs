@@ -6,6 +6,11 @@ using DotNetTestkit;
 using System.Linq;
 using CassiniDev.Core;
 using CassiniDev.Configuration;
+using System.CodeDom.Compiler;
+using System.Security.AccessControl;
+using System.Diagnostics;
+using System.Collections.Generic;
+using System.Text;
 
 namespace CassiniDev.Tests
 {
@@ -133,29 +138,76 @@ namespace CassiniDev.Tests
             Assert.That(output.ToString().Trim(), Is.EqualTo("Hello!"));
         }
 
-        //[Test]
-        //public void LoadAppWithConfigurationOverwrite()
-        //{
-        //    var serverPath = solutionFiles.ResolvePath("Tests/ExampleApps/ConfigurableApp");
-        //    var givenConfigRewrite = new ConfigReplacementsBuilder()
-        //        .ForPathWithValues("appSettings", new
-        //        {
-        //            applicationName = "ConfiguredApp!"
-        //        })
-        //        .Build();
+        [Test]
+        public void LoadAppWithConfigurationOverwrite()
+        {
+            var serverPath = solutionFiles.ResolvePath("Tests/ExampleApps/ConfigurableApp");
+            var givenConfigRewrite = new ConfigReplacementsBuilder()
+                .ForPathWithValues("appSettings", new
+                {
+                    applicationName = "ConfiguredApp!"
+                })
+                .Build();
 
-        //    var server = EmbeddedServer.NewServer()
-        //         .WithVirtualDirectory("/", serverPath, RewriteWebConfigWith(givenConfigRewrite))
-        //         .Start();
+            var server = EmbeddedServer.NewServer()
+                 .WithVirtualDirectory("/", WithRewrittenWebConfig(serverPath, givenConfigRewrite))
+                 .Start();
 
-        //    Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
-        //        Does.Contain("Hello, I'm ConfiguredApp!"));
-        //}
+            Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx")),
+                Does.Contain("Hello, I'm ConfiguredApp!"));
+        }
 
-        //private Func<WebAppConfigBuilder, WebAppConfigBuilder> RewriteWebConfigWith(ConfigReplacements replacements)
-        //{
-        //    return (builder) => builder;
-        //}
+        private string WithRewrittenWebConfig(string projectPath, ConfigReplacements replacements)
+        {
+            var tempFiles = new AutoRemovableDirectory();
+            var root = new DirectoryInfo(projectPath);
+            var rootUri = new Uri(Commons.EnsureTrailingSlash(projectPath));
+
+            Console.WriteLine("Dir {0}", tempFiles.BasePath);
+
+            CopyFilesFromDir(tempFiles, rootUri, root);
+
+            foreach (var dir in root.GetDirectories("*.*", System.IO.SearchOption.AllDirectories))
+            {
+                CopyFilesFromDir(tempFiles, rootUri, dir);
+            }
+
+            RewriteWebConfig(tempFiles, replacements);
+
+            return tempFiles.BasePath;
+        }
+
+        private static void RewriteWebConfig(AutoRemovableDirectory tempFiles, ConfigReplacements replacements)
+        {
+            var webConfig = tempFiles.ReadFile("Web.config");
+            var configRewriter = new ConfigRewriter(new ConfigSources(new Dictionary<string, string>()));
+
+            var rewrittenWebConfig = configRewriter.Rewrite(webConfig, replacements);
+
+            tempFiles.WriteFile("Web.config", rewrittenWebConfig);
+        }
+
+        private static void CopyFilesFromDir(AutoRemovableDirectory tempFiles, Uri rootUri, DirectoryInfo dir)
+        {
+            tempFiles.AddDirectory(ToRelativePath(rootUri, Commons.EnsureTrailingSlash(dir.FullName)));
+
+            foreach (var file in dir.GetFiles())
+            {
+                var fileUri = new Uri(file.FullName);
+                var relativeFileUri = rootUri.MakeRelativeUri(fileUri);
+                var relativePath = Uri.UnescapeDataString(relativeFileUri.ToString());
+
+                tempFiles.AddFile(relativePath, file.FullName);
+            }
+        }
+
+        private static string ToRelativePath(Uri rootUri, string fullname)
+        {
+            var fileUri = new Uri(fullname);
+            var relativeFileUri = rootUri.MakeRelativeUri(fileUri);
+
+            return Uri.UnescapeDataString(relativeFileUri.ToString());
+        }
     }
 
     class SimpleHttpClient
@@ -195,6 +247,83 @@ namespace CassiniDev.Tests
                     throw new UnableToConnect(url);
                 }                
             }
+        }
+    }
+
+    public class AutoRemovableDirectory: IDisposable
+    {
+        private readonly string autoremoveDirectory;
+        private readonly int pid;
+        private readonly DirectoryInfo processDir;
+
+        public string BasePath { get; internal set; }
+
+        public AutoRemovableDirectory()
+        {
+            this.pid = Process.GetCurrentProcess().Id;
+            this.autoremoveDirectory = Path.Combine(Path.GetTempPath(), ".dotnetteskit-autoremove");
+            this.processDir = new DirectoryInfo(Path.Combine(autoremoveDirectory, pid.ToString()));
+            this.BasePath = Path.Combine(processDir.FullName, Path.GetRandomFileName());
+
+            AppDomain.CurrentDomain.DomainUnload += CurrentDomain_DomainUnload;
+        }
+
+        private void CurrentDomain_DomainUnload(object sender, EventArgs e)
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (processDir.Exists)
+            {
+                processDir.Delete(true);
+            }
+        }
+
+        public void AddDirectory(string dirName)
+        {
+            Directory.CreateDirectory(ResolvePath(dirName));
+        }
+
+        public void AddFile(string relativePath, string fullName)
+        {
+            var targetFile = ResolvePath(relativePath);
+
+            File.Copy(fullName, targetFile);
+        }
+
+        public FileInfo ResolveFile(string path)
+        {
+            return new FileInfo(ResolvePath(path));
+        }
+
+        public string ReadFile(string path)
+        {
+            return File.ReadAllText(ResolvePath(path), Encoding.UTF8);
+        }
+
+        public void WriteFile(string path, string content)
+        {
+            File.WriteAllText(ResolvePath(path), content, Encoding.UTF8);
+        }
+
+        private string ResolvePath(string relativePath)
+        {
+            return Path.Combine(BasePath, relativePath);
+        }
+    }
+
+    internal class Commons
+    {
+        public static string EnsureTrailingSlash(string path)
+        {
+            if (path.EndsWith(Path.DirectorySeparatorChar.ToString()) || path.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+            {
+                return path;
+            }
+
+            return path + Path.DirectorySeparatorChar;
         }
     }
 }

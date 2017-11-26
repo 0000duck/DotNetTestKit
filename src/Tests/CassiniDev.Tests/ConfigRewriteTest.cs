@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using CassiniDev.Configuration;
+using System.Text;
 
 namespace CassiniDev.Tests
 {
@@ -41,6 +42,46 @@ namespace CassiniDev.Tests
                 }));
 
             Assert.That(rewrittenConfig, Does.Contain(@"value=""false"""));
+        }
+
+        [Test]
+        public void RewriteWithoutBOMSymbols()
+        {
+            var rewrittenConfig = ForConfigAndReplacements(@"
+                <configuration>
+                    <appSettings>
+                        <add key=""Test"" value=""true"" />
+                    </appSettings>
+                </configuration>",
+                (builder) => builder.ForPathWithValues("appSettings", new
+                {
+                    Test = "false"
+                }));
+
+            var encoding = Encoding.UTF8;
+
+            var bytes = encoding.GetBytes(rewrittenConfig);
+            var expectedFirstByte = (byte)'<';
+
+            Assert.That(bytes[0], Is.EqualTo(expectedFirstByte));
+        }
+
+        [Test]
+        public void RetainXmlDeclaration()
+        {
+            var rewrittenConfig = ForConfigAndReplacements(
+                @"<?xml version=""1.0"" encoding=""utf-8""?>
+                <configuration>
+                    <appSettings>
+                        <add key=""Test"" value=""true"" />
+                    </appSettings>
+                </configuration>",
+                (builder) => builder.ForPathWithValues("appSettings", new
+                {
+                    Test = "false"
+                }));
+
+            Assert.That(rewrittenConfig, Does.Contain(@"encoding=""utf-8"""));
         }
 
         [Test]

@@ -12,6 +12,15 @@ namespace CassiniDev.Configuration
     public class ConfigRewriter
     {
         private readonly ConfigSources sources;
+        private static Encoding utf8EncodingWithoutBOM = new UTF8Encoding(false);
+
+        public Encoding Encoding
+        {
+            get
+            {
+                return utf8EncodingWithoutBOM;
+            }
+        }
 
         public ConfigRewriter(ConfigSources sources)
         {
@@ -36,11 +45,12 @@ namespace CassiniDev.Configuration
                 RewriteElements(container.SelectNodes("add"), path);
             }
 
-            var writer = new StringWriter();
+            var bytes = new MemoryStream();
+            var writer = new StreamWriter(bytes, utf8EncodingWithoutBOM);
 
             doc.Save(writer);
 
-            return writer.ToString();
+            return utf8EncodingWithoutBOM.GetString(bytes.ToArray());
         }
 
         private void RewriteElements(XmlNodeList nodes, ConfigElementPath path)
