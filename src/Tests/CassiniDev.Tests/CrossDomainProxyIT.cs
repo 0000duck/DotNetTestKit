@@ -156,6 +156,11 @@ namespace CassiniDev.Tests
         {
             return invokers[typeName].Invoke(method, args);
         }
+
+        public override object InitializeLifetimeService()
+        {
+            return null;
+        }
     }
 
     public interface IDynamicInvoker
@@ -235,6 +240,11 @@ namespace CassiniDev.Tests
             }
 
             return rawReturnValue;
+        }
+
+        public override object InitializeLifetimeService()
+        {
+            return null;
         }
 
         public TypeCode GetTypeCode()
@@ -348,11 +358,6 @@ namespace CassiniDev.Tests
         {
             this.iface = typeof(T);
             this.handleInvoke = handleInvoke;
-        }
-
-        override public IEnumerable<string> GetDynamicMemberNames()
-        {
-            return new List<string>() { "Hello" };
         }
 
         public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)

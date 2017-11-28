@@ -66,6 +66,19 @@ namespace DotNetTestkit
                 this.server = server;
                 this.managementPort = managementPort;
             }
+
+            public int ManagementPort
+            {
+                get
+                {
+                    return managementPort;
+                }
+            }
+
+            public string ResolveUrl(string path)
+            {
+                return string.Format("http://localhost:{0}/{1}", managementPort, path);
+            }
         }
 
         public class Builder

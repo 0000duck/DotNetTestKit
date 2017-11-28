@@ -510,6 +510,8 @@ namespace CassiniDev
 
             Console.WriteLine("Server listening on management port {0}", serverInfo.Port);
 
+            ServeSocket(_managementSocket);
+
             try
             {
                 setupAction(serverInfo);

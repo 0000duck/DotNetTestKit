@@ -74,6 +74,9 @@ namespace CassiniDev.Tests
                 .WithSetup((serverSetUp) =>
                 {
                     setupCalled++;
+
+                    Assert.That(httpClient.Get(serverSetUp.ResolveUrl("Default.aspx")),
+                        Does.Contain("Hello, I'm RootApp"));
                 })
                 .Start())
             {
