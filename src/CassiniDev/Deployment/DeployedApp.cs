@@ -13,6 +13,7 @@ namespace CassiniDev.Deployment
     {
         private readonly string sourcePath;
         private readonly ConfigReplacements replacements;
+        private readonly List<ISyntheticType> syntheticTypes = new List<ISyntheticType>();
 
         public string PhysicalPath
         {
@@ -44,6 +45,12 @@ namespace CassiniDev.Deployment
             RewriteWebConfig(tempFiles, replacements);
 
             return new DeployedServerApp(tempFiles);
+        }
+
+        public DeployedApp WithSyntheticTypeFor<T>(string serviceClass, T implementation)
+        {
+            syntheticTypes.Add(new SyntheticType<T>(serviceClass, implementation));
+            return this;
         }
 
         private static void RewriteWebConfig(AutoRemovableDirectory tempFiles, ConfigReplacements replacements)
@@ -174,6 +181,22 @@ namespace CassiniDev.Deployment
             }
 
             return path + Path.DirectorySeparatorChar;
+        }
+    }
+
+    public interface ISyntheticType
+    {
+    }
+
+    public class SyntheticType<T>: ISyntheticType
+    {
+        private readonly T implementation;
+        private readonly string typeName;
+
+        public SyntheticType(string typeName, T implementation)
+        {
+            this.typeName = typeName;
+            this.implementation = implementation;
         }
     }
 }

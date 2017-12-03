@@ -89,6 +89,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\GreeterService.cs" />
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -100,6 +101,12 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="App_Start\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\TestContracts\TestContracts.csproj">
+      <Project>{a300e9c2-21b5-4db7-a510-5bf90bb2a959}</Project>
+      <Name>TestContracts</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

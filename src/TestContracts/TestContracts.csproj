@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{89710BAD-4819-4564-9312-37DA9D750838}</ProjectGuid>
+    <ProjectGuid>{A300E9C2-21B5-4DB7-A510-5BF90BB2A959}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SetUpEnvironmentApp</RootNamespace>
-    <AssemblyName>SetUpEnvironmentApp</AssemblyName>
+    <RootNamespace>TestContracts</RootNamespace>
+    <AssemblyName>TestContracts</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,7 +24,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -40,31 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExampleEnvironment.cs" />
-    <Compile Include="GreeterService.cs" />
+    <Compile Include="IGreeterService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerEnvironment.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\CassiniDev\CassiniDev.Lib4.csproj">
-      <Project>{070ae36d-4ce1-4708-bd0f-2896a6f117fc}</Project>
-      <Name>CassiniDev.Lib4</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\EmbeddedServer\EmbeddedServer.csproj">
-      <Project>{187b166b-ef4f-4d34-beb9-c6a4ed71479e}</Project>
-      <Name>EmbeddedServer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\EnvironmentLifecycle\EnvironmentLifecycle.csproj">
-      <Project>{b06c4caa-82fa-4845-b72a-2f33d3361de5}</Project>
-      <Name>EnvironmentLifecycle</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\TestContracts\TestContracts.csproj">
-      <Project>{a300e9c2-21b5-4db7-a510-5bf90bb2a959}</Project>
-      <Name>TestContracts</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

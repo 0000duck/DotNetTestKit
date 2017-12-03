@@ -87,10 +87,12 @@ namespace DotNetTestkit
             private List<DirectoryMapping> virtualDirectories = new List<DirectoryMapping>();
             private List<Action<ServerSetup>> setupActions = new List<Action<ServerSetup>>();
             private TextWriter outputWriter;
+            private readonly Uri baseUrl;
 
             protected internal Builder(int port)
             {
                 this.port = port;
+                this.baseUrl = new Uri(string.Format("http://localhost:{0}", port));
             }
 
             public Builder WithSetup(Action<ServerSetup> setupAction)
@@ -98,6 +100,11 @@ namespace DotNetTestkit
                 this.setupActions.Add(setupAction);
 
                 return this;
+            }
+
+            public string ResolveUrl(string path)
+            {
+                return new Uri(baseUrl, path).ToString();
             }
 
             public Builder WithVirtualDirectory(string virtualPath, string directoryPath)

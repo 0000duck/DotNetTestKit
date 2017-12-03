@@ -74,29 +74,10 @@ namespace CassiniDev.Tests
         {
             var curDomain = AppDomain.CurrentDomain;
             var binPath = Path.GetDirectoryName(dllPath);
-            //var shadowBin = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-
-            //Directory.CreateDirectory(shadowBin);
-            //File.WriteAllText(Path.Combine(shadowBin, "hello.txt"), "Hello");
-
-            //Console.WriteLine("Shadow bin at {0}", shadowBin);
 
             var evidence = new Evidence(AppDomain.CurrentDomain.Evidence);
 
-            //var setup = new AppDomainSetup();
             var name = "DomainUnderTest";
-
-            //setup.ApplicationName = name;
-            //setup.DynamicBase = curDomain.DynamicDirectory;
-            //setup.CachePath = shadowBin;
-            //setup.ShadowCopyDirectories = null;
-            //setup.ShadowCopyFiles = "true";
-            //setup.ApplicationBase = binPath;
-            ////setup.se
-
-            ////setup.ConfigurationFile = Path.Combine(dirPath, configFile);
-            //setup.PrivateBinPath = binPath;
-
             var domain = AppDomain.CreateDomain(name, evidence, binPath, null, true);
 
             return domain;

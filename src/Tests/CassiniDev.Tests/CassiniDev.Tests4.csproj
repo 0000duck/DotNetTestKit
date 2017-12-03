@@ -170,6 +170,10 @@
       <Project>{b06c4caa-82fa-4845-b72a-2f33d3361de5}</Project>
       <Name>EnvironmentLifecycle</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\TestContracts\TestContracts.csproj">
+      <Project>{A300E9C2-21B5-4DB7-A510-5BF90BB2A959}</Project>
+      <Name>TestContracts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CassiniDev4.Tests.Web\CassiniDev4.Tests.Web.csproj">
       <Project>{D4BEEAC1-493C-4B21-ADDB-0B29CDBD8266}</Project>
       <Name>CassiniDev4.Tests.Web</Name>

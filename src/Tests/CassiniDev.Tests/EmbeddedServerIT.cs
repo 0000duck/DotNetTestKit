@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
 using CassiniDev.Deployment;
+using TestContracts;
 
 namespace CassiniDev.Tests
 {
@@ -88,6 +89,16 @@ namespace CassiniDev.Tests
         }
 
         [Test]
+        public void ServerBuilderShouldResolveUrl()
+        {
+            var serverBuilder = EmbeddedServer.NewServer(9999)
+                .WithVirtualDirectory("/", solutionFiles.ResolvePath("Tests\\ExampleApps\\RootApp"));
+
+            Assert.That(serverBuilder.ResolveUrl("Default.aspx"),
+               Is.EqualTo("http://localhost:9999/Default.aspx"));
+        }
+
+        [Test]
         public void LoadMultipleApps()
         {
             var server = EmbeddedServer.NewServer()
@@ -161,6 +172,31 @@ namespace CassiniDev.Tests
                 Does.Contain("Hello, I'm ConfiguredApp!"));
         }
 
+        [Test]
+        [Ignore("WIP")]
+        public void GenerateACrossDomainProxyToInjectClass()
+        {
+            var serverPath = solutionFiles.ResolvePath("Tests/ExampleApps/ConfigurableApp");
+            var serviceClass = "A.B.C.SomeClass";
+
+            var spanishGreeter = new SpanishGreeter();
+
+            var givenConfigRewrite = new ConfigReplacementsBuilder()
+                .ForPathWithValues("appSettings", new
+                {
+                    serviceClass = serviceClass
+                })
+                .Build();
+
+            var server = EmbeddedServer.NewServer()
+                 .WithVirtualDirectory("/", new DeployedApp(serverPath, givenConfigRewrite)
+                    .WithSyntheticTypeFor<IGreeterService>(serviceClass, spanishGreeter))
+                 .Start();
+
+            Assert.That(httpClient.Get(server.ResolveUrl("Default.aspx?Name=Mantas")),
+                Does.Contain("Mantas: Hola, Mantas"));
+        }
+
         private string WithRewrittenWebConfig(string projectPath, ConfigReplacements replacements)
         {
             var tempFiles = new AutoRemovableDirectory();
@@ -209,6 +245,14 @@ namespace CassiniDev.Tests
             var relativeFileUri = rootUri.MakeRelativeUri(fileUri);
 
             return Uri.UnescapeDataString(relativeFileUri.ToString());
+        }
+
+        public class SpanishGreeter : IGreeterService
+        {
+            public string Greet(string name)
+            {
+                return string.Format("Hola, {0}", name);
+            }
         }
     }
 
